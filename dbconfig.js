@@ -18,6 +18,8 @@
  * NAME
  *   dbconfig.js
  *
+ * 
+ * 
  * DESCRIPTION
  *   Holds the credentials used by node-oracledb examples to connect
  *   to the database.  Production applications should consider using
