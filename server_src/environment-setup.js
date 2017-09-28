@@ -25,8 +25,8 @@ log.transports.file.level = 'info';
 createLogsDir();
 
 log.transports.file.file = path.join(__dirname, '..', `/logs/${getLogFileName()}`);
-log.info('_____________________');
-log.info('Current environment variables setup: ');
-log.info(process.env);
-log.info('_____________________');
+// log.info('_____________________');
+// log.info('Current environment variables setup: ');
+// log.info(process.env);
+// log.info('_____________________');
 

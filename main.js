@@ -7,8 +7,7 @@ var path = require('path');
 const {app, BrowserWindow} = require('electron');
 const url = require('url')
 var log = require('electron-log');
-
-var select1 = require('./select1.js');
+const getDDL = require('./server_src/db_operations/getDDL.js');
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -51,6 +50,16 @@ function createWindow() {
     if ( dev ) {
       mainWindow.webContents.openDevTools();
     }
+
+    // getDDL.getDDLFunction('VIEW','TW_CLA_STATISTICS_AV', 'TIA').then(function(result) {
+    //   log.info('main: getDDL returned: ', result);
+    // }).catch(function(error){
+    //   log.error(error);
+    // });
+
+    //start listener
+    require('./server_src/server_listeners/DDLListener.js');
+    
   });
 
   // Emitted when the window is closed.

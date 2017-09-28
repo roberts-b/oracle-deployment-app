@@ -2,3 +2,8 @@ h1 {
   font-family: helvetica;
   font-weight: 200;
 }
+
+textarea {
+  width: 700px;
+  height: 1000px;
+}
