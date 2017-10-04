@@ -1,6 +1,6 @@
 'use strict';
 
-require('./server_src/environment-setup.js');
+require('./server_src/setup/environment-setup.js');
 
 // Import parts of electron to use
 var path = require('path');
@@ -20,6 +20,10 @@ if ( process.defaultApp || /[\\/]electron-prebuilt[\\/]/.test(process.execPath) 
 }
 
 function createWindow() {
+  //start listener
+  loadAllListeners();
+
+
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 1024, height: 768, show: false
@@ -56,9 +60,6 @@ function createWindow() {
     // }).catch(function(error){
     //   log.error(error);
     // });
-
-    //start listener
-    require('./server_src/server_listeners/DDLListener.js');
     
   });
 
@@ -95,3 +96,14 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
+//print to log unhandled promise rejections
+process.on('unhandledRejection', error => {
+  // Prints "unhandledRejection woops!"
+  log.error('unhandledRejection', error);
+});
+
+function loadAllListeners(){
+  require('./server_src/server_listeners/DDL-listener.js');
+  require('./server_src/server_listeners/tns-listener.js');
+}

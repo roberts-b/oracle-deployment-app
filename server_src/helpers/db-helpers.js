@@ -1,5 +1,7 @@
-var log = require('electron-log');
-var dbConfig = require('../config/dbconfig.js');
+const log = require('electron-log');
+const constants = require('../constants/constants.js')
+const settings = require('electron-settings');
+const settingsHelper = require('../helpers/settings-helper.js');
 
 // Stream a CLOB and builds up a String piece-by-piece
 exports.parseClob = function (clob, connection) {
@@ -68,8 +70,8 @@ var doRelease = exports.doRelease = function (connection) {
 
 exports.getConnectionParametersObject = function () {
 	return {
-		user: dbConfig.user,
-		password: dbConfig.password,
-		connectString: dbConfig.connectString
+		user: settings.get('crsDev.user','TIA'),
+		password: settings.get('crsDev.password','tia7vatit'),
+		connectString: settingsHelper.getCurrentTnsName(),
 	};
 };

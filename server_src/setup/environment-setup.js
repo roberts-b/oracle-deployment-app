@@ -2,10 +2,8 @@
 
 const path = require('path');
 const settings = require('electron-settings');
-const INSTANT_CLIENT_SETTINGS_NAME = 'instantclient_path';
-const TNSNAMES_FOLDER_SETTINGS_NAME = 'tnsnames_path';
-const LOGS_FOLDER_SETTINGS_NAME = 'logs_path';
-const LOGGING_LEVEL_SETTTINGS_NAME = 'logs_level';
+const constants = require('../constants/constants.js');
+const settingsHelper = require('../helpers/settings-helper.js');
 
 
 function getLogFileName(){
@@ -13,7 +11,7 @@ function getLogFileName(){
 }
 
 function getLogsFilesFolderPath(){
-    return settings.get(LOGS_FOLDER_SETTINGS_NAME, path.join(__dirname, '..', '/logs/'));
+    return settings.get(constants.LOGS_FOLDER_SETTINGS_NAME, path.join(__dirname, '..', '/logs/'));
 }
 
 function createLogsDir(){
@@ -28,14 +26,17 @@ function createLogsDir(){
 
 //sets path to Oracle Instant client
 // presetDefaultSettingsValueIfNeeded(INSTANT_CLIENT_SETTINGS_NAME);
-process.env['PATH'] = settings.get(INSTANT_CLIENT_SETTINGS_NAME, path.join(__dirname,'..', '/instantclient')) + ';' + process.env['PATH'];
+process.env['PATH'] = settings.get(constants.INSTANT_CLIENT_SETTINGS_NAME, path.join(__dirname,'..', '/instantclient')) + ';' + process.env['PATH'];
 
 //sets path to folder which contains tnsNames.ora file
-process.env['TNS_ADMIN']=settings.get(TNSNAMES_FOLDER_SETTINGS_NAME, path.join(__dirname,'..', '/tnsNames'));
+process.env['TNS_ADMIN']=settingsHelper.getTnsFilePath();
+
+//preset default tnsname if needed
+settingsHelper.presetDefaultTnsNameIfNeeded();
 
 //configure logging
 const log = require('electron-log');
-log.transports.file.level = settings.get(LOGGING_LEVEL_SETTTINGS_NAME, 'info');;
+log.transports.file.level = settings.get(constants.LOGGING_LEVEL_SETTTINGS_NAME, 'info');;
 
 createLogsDir();
 

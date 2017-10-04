@@ -1,7 +1,9 @@
 import '../assets/css/App.css';
+import 'semantic-ui-css/semantic.min.css';
 import React, { Component } from 'react';
 const {ipcRenderer} = require('electron');
-
+import ConnectionComponent from './connection/connection-component.js';
+import { Button, Container, Header, TextArea } from 'semantic-ui-react';
 
 
 class App extends React.Component {
@@ -21,16 +23,17 @@ class App extends React.Component {
   }
   render() {
     return (
-      <div>
-        <div>
-          <h1>DDL requesting page</h1>
+      <Container>
+        <Container>
+          <Header as='h1'>DDL requesting page</Header>
+          <ConnectionComponent/>
           <p>Press request DDL to get DDL for statistics view</p>
-          <button onClick={this.requestDDL}>Request DDL</button>
-        </div>
-        <div>
-          <textarea value={this.state.ddl_value}/>
-        </div>
-      </div>
+          <Button onClick={this.requestDDL}>Request DDL</Button>
+        </Container>
+        <Container>
+          <TextArea value={this.state.ddl_value}/>
+        </Container>
+      </Container>
     );
   };
 

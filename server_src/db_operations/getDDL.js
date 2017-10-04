@@ -5,6 +5,7 @@ var { parseClob, doRelease, getConnectionParametersObject } = require('../helper
 
 // Get a non-pooled connection
 exports.getDDLFunction = function (objectType, objectName, dbSchema) {
+    log.info(getConnectionParametersObject());
     return new Promise(function (resolve, reject) {
         oracledb.getConnection(
             getConnectionParametersObject(),

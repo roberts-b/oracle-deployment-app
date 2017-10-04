@@ -22,7 +22,7 @@ module.exports = {
       {
         test: /\.css$/,
         use: [{ loader: 'style-loader' }, { loader: 'css-loader' }],
-        include: defaultInclude
+        include: [SRC_DIR, path.resolve(__dirname, 'node_modules/semantic-ui-css')]
       },
       {
         test: /\.jsx?$/,
@@ -32,12 +32,12 @@ module.exports = {
       {
         test: /\.(jpe?g|png|gif)$/,
         use: [{ loader: 'file-loader?name=img/[name]__[hash:base64:5].[ext]' }],
-        include: defaultInclude
+        include: [SRC_DIR, path.resolve(__dirname, 'node_modules/semantic-ui-css')]
       },
       {
         test: /\.(eot|svg|ttf|woff|woff2)$/,
         use: [{ loader: 'file-loader?name=font/[name]__[hash:base64:5].[ext]' }],
-        include: defaultInclude
+        include: [SRC_DIR, path.resolve(__dirname, 'node_modules/semantic-ui-css')]
       }
     ]
   },
