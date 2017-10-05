@@ -11,7 +11,7 @@ exports.getAllTnsNames = function(){
         fs.readFile(tnsPath + 'tnsnames.ora', 'utf-8', (err, result) => {
             log.info('inside getAllTnsNames contents: '+ result);
             if(err){
-                reject(err);
+                reject(Error(err));
             }else{
                 const contents = tns(result);
                 resolve(Object.keys(contents));

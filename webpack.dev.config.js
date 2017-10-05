@@ -58,8 +58,7 @@ module.exports = {
     },
     setup() {
       spawn(
-        'electron',
-        ['.'],
+        'electron . --inspect=40615 --debug main.js',
         { shell: true, env: process.env, stdio: 'inherit' }
       )
       .on('close', code => process.exit(0))

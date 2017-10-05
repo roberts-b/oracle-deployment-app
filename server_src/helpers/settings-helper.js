@@ -27,3 +27,9 @@ exports.presetDefaultTnsNameIfNeeded = function () {
         });
     }
 };
+
+exports.setCurrentlyUsedTnsName = function(newTnsName) {
+    log.info('setCurrentlyUsedTnsName setting new value: ', newTnsName);
+    settings.set(constants.CURRENT_DATABASE_SETTINGS_NAME, newTnsName);
+    return constants.SUCCESS_MESSAGE;
+}

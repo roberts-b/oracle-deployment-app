@@ -13,6 +13,7 @@ exports.getDDLFunction = function (objectType, objectName, dbSchema) {
                 if (err) {
                     log.error(err.message);
                     reject(Error(err));
+                    return;
                 }
 
                 var bindvars = {

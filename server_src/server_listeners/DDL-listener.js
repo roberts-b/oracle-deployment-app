@@ -10,9 +10,9 @@ ipcMain.on('getDDL_async', (event, args) => {
             event.sender.send('getDDL_reply_async', result);
 
         }).catch(function(error){
-            log.error('DDLListener received from getDDLFunction reply: ', result);
-            event.sender.send('getDDL_reply_async', error);
-        })
+            log.error('DDLListener received from getDDLFunction reply: ', error);
+            event.sender.send('getDDL_reply_async', error.message);
+        });
     
     
  }); 

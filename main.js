@@ -7,6 +7,7 @@ var path = require('path');
 const {app, BrowserWindow} = require('electron');
 const url = require('url')
 var log = require('electron-log');
+log.info('loading app');
 const getDDL = require('./server_src/db_operations/getDDL.js');
 
 // Keep a global reference of the window object, if you don't, the window will

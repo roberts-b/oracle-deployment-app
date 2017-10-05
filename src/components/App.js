@@ -10,15 +10,18 @@ class App extends React.Component {
 
   constructor(props){
     super(props);
+    this.bindComponentListeners();
     this.state = {
-      ddl_value: ''
+      ddl_value: '',
+      isLoading: false
     }
   }
   componentDidMount() {
     this.result = 'no results';
     ipcRenderer.on('getDDL_reply_async', (event, arg) => {
       console.log(arg); // prints "pong"
-      this.setState({ddl_value: arg});
+      this.setState({ddl_value: arg, isLoading: false});
+
     });
   }
   render() {
@@ -28,7 +31,7 @@ class App extends React.Component {
           <Header as='h1'>DDL requesting page</Header>
           <ConnectionComponent/>
           <p>Press request DDL to get DDL for statistics view</p>
-          <Button onClick={this.requestDDL}>Request DDL</Button>
+          <Button loading={this.state.isLoading} disabled={this.state.isLoading} onClick={this.requestDDL}>Request DDL</Button>
         </Container>
         <Container>
           <TextArea value={this.state.ddl_value}/>
@@ -45,7 +48,12 @@ class App extends React.Component {
       objectName: 'TW_CLA_STATISTICS_AV',
       dbSchema: 'TIA'
     });
+    this.setState({ isLoading: true });
   };
+
+  bindComponentListeners() {
+    this.requestDDL = this.requestDDL.bind(this);
+}
 }
 
 
