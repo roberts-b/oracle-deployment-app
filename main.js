@@ -4,7 +4,7 @@ require('./server_src/setup/environment-setup.js');
 
 // Import parts of electron to use
 var path = require('path');
-const {app, BrowserWindow} = require('electron');
+const {app, BrowserWindow, ipcMain} = require('electron');
 const url = require('url')
 var log = require('electron-log');
 log.info('loading app');
@@ -55,12 +55,6 @@ function createWindow() {
     if ( dev ) {
       mainWindow.webContents.openDevTools();
     }
-
-    // getDDL.getDDLFunction('VIEW','TW_CLA_STATISTICS_AV', 'TIA').then(function(result) {
-    //   log.info('main: getDDL returned: ', result);
-    // }).catch(function(error){
-    //   log.error(error);
-    // });
     
   });
 
@@ -70,6 +64,14 @@ function createWindow() {
     // in an array if your app supports multi windows, this is the time
     // when you should delete the corresponding element.
     mainWindow = null;
+
+    ipcMain.removeAllListeners([
+      'get_all_tns_async',
+       'get_current_tns_sync',
+       'set_current_tns_sync',
+       'getDDL_async'
+      ]);
+    console.log('mainWindow.on(closed) all RPC listeners unregistered');
   });
 
 
@@ -101,7 +103,7 @@ app.on('activate', () => {
 //print to log unhandled promise rejections
 process.on('unhandledRejection', error => {
   // Prints "unhandledRejection woops!"
-  log.error('unhandledRejection', error);
+  log.error('unhandledRejection: ', error);
 });
 
 function loadAllListeners(){

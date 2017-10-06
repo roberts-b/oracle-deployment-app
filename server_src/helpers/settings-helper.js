@@ -33,3 +33,17 @@ exports.setCurrentlyUsedTnsName = function(newTnsName) {
     settings.set(constants.CURRENT_DATABASE_SETTINGS_NAME, newTnsName);
     return constants.SUCCESS_MESSAGE;
 }
+
+exports.getUserNamePasswordByTnsName = function(tnsName) {
+    log.info('getUserNamePasswordByTnsName received TnsName: ',tnsName);
+    let userName = settings.get(tnsName+'.user');
+    let password = settings.get(tnsName+'.password');
+
+    if(userName === undefined){
+        userName = '';
+    }
+    if(password === undefined){
+        password = '';
+    }
+    return {userName: userName, password: password};
+}

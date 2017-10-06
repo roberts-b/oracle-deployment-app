@@ -1,6 +1,5 @@
 const log = require('electron-log');
 const constants = require('../../src/constants/constants.js');
-const settings = require('electron-settings');
 const settingsHelper = require('../helpers/settings-helper.js');
 
 // Stream a CLOB and builds up a String piece-by-piece
@@ -69,9 +68,11 @@ var doRelease = exports.doRelease = function (connection) {
 };
 
 exports.getConnectionParametersObject = function () {
+	let currentTnsName = settingsHelper.getCurrentTnsName();
+	let userNamePasswordObject = settingsHelper.getUserNamePasswordByTnsName(currentTnsName);
 	return {
-		user: settings.get('crsDev.user','TIA'),
-		password: settings.get('crsDev.password','tia7vatit'),
-		connectString: settingsHelper.getCurrentTnsName(),
+		user: userNamePasswordObject.userName,
+		password: userNamePasswordObject.password,
+		connectString: currentTnsName,
 	};
 };
