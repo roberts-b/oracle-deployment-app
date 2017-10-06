@@ -1,4 +1,4 @@
-const constants = require('../constants/constants.js');
+const constants = require('../../src/constants/constants.js');
 const settings = require('electron-settings');
 const path = require('path');
 var log = require('electron-log');

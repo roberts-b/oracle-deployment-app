@@ -1,5 +1,5 @@
 const log = require('electron-log');
-const constants = require('../constants/constants.js')
+const constants = require('../../src/constants/constants.js');
 const settings = require('electron-settings');
 const settingsHelper = require('../helpers/settings-helper.js');
 

@@ -2,7 +2,7 @@
 
 const path = require('path');
 const settings = require('electron-settings');
-const constants = require('../constants/constants.js');
+const constants = require('../../src/constants/constants.js');
 const settingsHelper = require('../helpers/settings-helper.js');
 
 

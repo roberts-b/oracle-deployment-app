@@ -2,7 +2,7 @@ var {ipcMain} = require('electron');
 var log = require('electron-log');
 var {getAllTnsNames} = require('../tns_operations/parse-tnsfile.js');
 var settingsHelper = require('../helpers/settings-helper');
-const constants = require('../constants/constants.js');
+const constants = require('../../src/constants/constants.js');
 
 ipcMain.on('get_all_tns_async', (event, args) => { 
     log.info('get_all_tns_async received '); 
