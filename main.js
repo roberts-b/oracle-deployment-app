@@ -65,12 +65,14 @@ function createWindow() {
     // when you should delete the corresponding element.
     mainWindow = null;
 
-    ipcMain.removeAllListeners([
-      'get_all_tns_async',
-       'get_current_tns_sync',
-       'set_current_tns_sync',
-       'getDDL_async'
-      ]);
+
+    //TODO: maybe it is not needed currently will remove, later will have to check
+    // ipcMain.removeAllListeners([
+    //   'get_all_tns_async',
+    //    'get_current_tns_sync',
+    //    'set_current_tns_sync',
+    //    'getDDL_async'
+    //   ]);
     console.log('mainWindow.on(closed) all RPC listeners unregistered');
   });
 

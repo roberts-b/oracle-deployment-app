@@ -47,3 +47,13 @@ exports.getUserNamePasswordByTnsName = function(tnsName) {
     }
     return {userName: userName, password: password};
 }
+
+exports.setUserNamePasswordByTnsName = function(valueObject){
+    log.info('setUserNamePasswordByTnsName received value: ', valueObject);
+    const tnsName = valueObject.tnsName;
+    const userName = valueObject.userName;
+    const password = valueObject.password;
+    settings.set(tnsName+'.user', userName);
+    settings.set(tnsName+'.password', password);
+    return 'New values are preset successfully';
+}

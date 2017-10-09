@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 const { ipcRenderer } = require('electron');
 import { Segment, Header, Dropdown, Form } from 'semantic-ui-react';
 import Constants from '../../constants/constants.js';
+import rpcNames from '../../constants/rpc-names.js';
 import PropTypes from 'prop-types';
 
 class ConnectionComponent extends React.Component {
@@ -20,17 +21,16 @@ class ConnectionComponent extends React.Component {
     componentDidMount() {
         this.getAllTnsNames();
         this.getCurrentTnsName();
+        this.registerIpcListeners();
     }
 
-    isNotificationsPresent() {
-        return;
-    }
-
-    
+    componentWillUnmount() {
+        console.log('Component will unmount called.');
+        this.removeAllIpcListeners();
+        
+      }
 
     render() {
-
-
         return (
             <Segment.Group horizontal>
                 <Segment inverted color='grey'>
@@ -67,14 +67,14 @@ class ConnectionComponent extends React.Component {
                 return;
             }
             //save also new value to preferences
-            let result = ipcRenderer.sendSync('set_current_tns_sync', newValue);
+            let result = ipcRenderer.sendSync(rpcNames.SET_CURRENT_TNS_NAME.reqName, newValue);
 
             this.setState({ currentTnsname: newValue });
 
             this.setCurrentUserNamePassword(newValue);
 
             let isSuccess = Constants.SUCCESS_MESSAGE === result.status;
-            this.props.addMessageToNotificationsArray({ isPositive: isSuccess, text: isSuccess ? 'Successfully updated preferences to use ' + newValue : 'Failed to update preferences to use ' + newValue });
+            // this.props.addMessageToNotificationsArray({ isPositive: isSuccess, text: isSuccess ? 'Successfully updated preferences to use ' + newValue : 'Failed to update preferences to use ' + newValue });
         } else if(targetName === 'userName' || targetName === 'password') {
             this.setCredentialValueToState(newValue, targetName);
         }
@@ -92,14 +92,18 @@ class ConnectionComponent extends React.Component {
 
     handleCredentialsSubmit() {
         console.log('handleCredentialsSubmit new username: ' + this.state.credentials.userName + ' new password: ' + this.state.credentials.password);
+        ipcRenderer.send(rpcNames.SET_USERNAME_PASSWORD_BY_TNS_NAME.reqName,
+             {tnsName: this.state.currentTnsname,
+                userName: this.state.credentials.userName,
+                password: this.state.credentials.password});
     }
 
     getAllTnsNames() {
-        ipcRenderer.send('get_all_tns_async');
+        ipcRenderer.send(rpcNames.GET_ALL_TNS_NAMES.reqName);
         console.log('getOptions sent');
 
         //must use once because we need responce only one time, this way we don't have to deregister this listeren
-        ipcRenderer.once('get_all_tns_reply_async', (event, arg) => {
+        ipcRenderer.once(rpcNames.GET_ALL_TNS_NAMES.respName, (event, arg) => {
             if(arg.status === Constants.FAILURE_MESSAGE){
                 this.props.addMessageToNotificationsArray({ isPositive: false, text: 'Failed to get all TNS names !!' });
                 return;
@@ -117,7 +121,7 @@ class ConnectionComponent extends React.Component {
     };
 
     getCurrentTnsName() {
-        const currentTnsName = ipcRenderer.sendSync('get_current_tns_sync');
+        const currentTnsName = ipcRenderer.sendSync(rpcNames.GET_CURRENT_TNS_NAME.reqName);
         if(currentTnsName.status === Constants.FAILURE_MESSAGE){
             this.props.addMessageToNotificationsArray({ isPositive: false, text: 'Failed to load current TNS name !!!' });
             return;
@@ -133,15 +137,31 @@ class ConnectionComponent extends React.Component {
     }
 
     setCurrentUserNamePassword(tnsName){
-        const result = ipcRenderer.sendSync('get_username_password_by_tns_name_sync',tnsName);
+        const result = ipcRenderer.sendSync(rpcNames.GET_USERNAME_PASSWORD_BY_TNS_NAME.reqName,tnsName);
         console.log('setCurrentUserNamePassword initialValue = ', result);
         if(result.status === Constants.FAILURE_MESSAGE){
             this.props.addMessageToNotificationsArray({ isPositive: false, text: 'Failed to load current username and password for tnsName: '+tnsName });
             return;
         }
         const usernamePasswordObject = result.value;
-        console.log('setCurrentUserNamePassword result: ', usernamePasswordObject);
         this.setState({ credentials: usernamePasswordObject});
+    }
+
+    registerIpcListeners(){
+        ipcRenderer.on(rpcNames.SET_USERNAME_PASSWORD_BY_TNS_NAME.reqName, (event, arg) => {
+            if (arg.status === Constants.SUCCESS_MESSAGE) {
+                this.props.addMessageToNotificationsArray({ isPositive: true, text: arg.value });
+            } else if (arg.status === Constants.FAILURE_MESSAGE) {
+              this.props.addMessageToNotificationsArray({ isPositive: false, text: arg.value });
+            }
+          });
+    }
+
+    removeAllIpcListeners(){
+        console.log('connection Component will unmount called.');
+        
+            //we must deregister all IPCRenderer listeners here
+        ipcRenderer.removeAllListeners([rpcNames.SET_USERNAME_PASSWORD_BY_TNS_NAME.respName]);
     }
 }
 
