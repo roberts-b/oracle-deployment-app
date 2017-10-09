@@ -13,22 +13,23 @@ class ConnectionComponent extends React.Component {
         this.state = {
             currentTnsname: '',
             allTnsNames: [],
-            
+
             credentials: { userName: '', password: '' }
         }
     }
 
     componentDidMount() {
+        this.registerIpcListeners();
         this.getAllTnsNames();
         this.getCurrentTnsName();
-        this.registerIpcListeners();
+        
     }
 
     componentWillUnmount() {
         console.log('Component will unmount called.');
         this.removeAllIpcListeners();
-        
-      }
+
+    }
 
     render() {
         return (
@@ -46,9 +47,20 @@ class ConnectionComponent extends React.Component {
                 <Segment inverted color='grey'>
                     <Form onSubmit={this.handleCredentialsSubmit}>
                         <Form.Group>
-                            <Form.Input placeholder='User Name' name='userName' value={this.state.credentials.userName} onChange={this.handleInputChange} />
-                            <Form.Input type='password' placeholder='Password' name='password' value={this.state.credentials.password} onChange={this.handleInputChange} />
-                            <Form.Button content='Save' />
+                            <Form.Input required
+                                error={this.isUserNameInvalid()}
+                                placeholder='User Name'
+                                name='userName'
+                                value={this.state.credentials.userName}
+                                onChange={this.handleInputChange} />
+                            <Form.Input required
+                                error={this.isPasswordInvalid()}
+                                type='password'
+                                placeholder='Password'
+                                name='password'
+                                value={this.state.credentials.password}
+                                onChange={this.handleInputChange} />
+                            <Form.Button disabled={this.isUserNameInvalid() || this.isPasswordInvalid()} content='Save' />
                         </Form.Group>
                     </Form>
                 </Segment>
@@ -62,7 +74,7 @@ class ConnectionComponent extends React.Component {
         let newValue = data['value'];
 
         if (targetName === 'tnsDropDown') {
-            if(newValue === this.state.currentTnsname){
+            if (newValue === this.state.currentTnsname) {
                 //skip if selected same value
                 return;
             }
@@ -75,7 +87,7 @@ class ConnectionComponent extends React.Component {
 
             let isSuccess = Constants.SUCCESS_MESSAGE === result.status;
             // this.props.addMessageToNotificationsArray({ isPositive: isSuccess, text: isSuccess ? 'Successfully updated preferences to use ' + newValue : 'Failed to update preferences to use ' + newValue });
-        } else if(targetName === 'userName' || targetName === 'password') {
+        } else if (targetName === 'userName' || targetName === 'password') {
             this.setCredentialValueToState(newValue, targetName);
         }
     }
@@ -93,9 +105,11 @@ class ConnectionComponent extends React.Component {
     handleCredentialsSubmit() {
         console.log('handleCredentialsSubmit new username: ' + this.state.credentials.userName + ' new password: ' + this.state.credentials.password);
         ipcRenderer.send(rpcNames.SET_USERNAME_PASSWORD_BY_TNS_NAME.reqName,
-             {tnsName: this.state.currentTnsname,
+            {
+                tnsName: this.state.currentTnsname,
                 userName: this.state.credentials.userName,
-                password: this.state.credentials.password});
+                password: this.state.credentials.password
+            });
     }
 
     getAllTnsNames() {
@@ -104,7 +118,7 @@ class ConnectionComponent extends React.Component {
 
         //must use once because we need responce only one time, this way we don't have to deregister this listeren
         ipcRenderer.once(rpcNames.GET_ALL_TNS_NAMES.respName, (event, arg) => {
-            if(arg.status === Constants.FAILURE_MESSAGE){
+            if (arg.status === Constants.FAILURE_MESSAGE) {
                 this.props.addMessageToNotificationsArray({ isPositive: false, text: 'Failed to get all TNS names !!' });
                 return;
             }
@@ -122,12 +136,12 @@ class ConnectionComponent extends React.Component {
 
     getCurrentTnsName() {
         const currentTnsName = ipcRenderer.sendSync(rpcNames.GET_CURRENT_TNS_NAME.reqName);
-        if(currentTnsName.status === Constants.FAILURE_MESSAGE){
+        if (currentTnsName.status === Constants.FAILURE_MESSAGE) {
             this.props.addMessageToNotificationsArray({ isPositive: false, text: 'Failed to load current TNS name !!!' });
             return;
         }
         console.log('getCurrentTnsName result: ', currentTnsName.value);
-        this.setState({ currentTnsname: currentTnsName.value});
+        this.setState({ currentTnsname: currentTnsName.value });
         this.setCurrentUserNamePassword(currentTnsName.value);
     }
 
@@ -136,32 +150,40 @@ class ConnectionComponent extends React.Component {
         this.handleCredentialsSubmit = this.handleCredentialsSubmit.bind(this);
     }
 
-    setCurrentUserNamePassword(tnsName){
-        const result = ipcRenderer.sendSync(rpcNames.GET_USERNAME_PASSWORD_BY_TNS_NAME.reqName,tnsName);
+    setCurrentUserNamePassword(tnsName) {
+        const result = ipcRenderer.sendSync(rpcNames.GET_USERNAME_PASSWORD_BY_TNS_NAME.reqName, tnsName);
         console.log('setCurrentUserNamePassword initialValue = ', result);
-        if(result.status === Constants.FAILURE_MESSAGE){
-            this.props.addMessageToNotificationsArray({ isPositive: false, text: 'Failed to load current username and password for tnsName: '+tnsName });
+        if (result.status === Constants.FAILURE_MESSAGE) {
+            this.props.addMessageToNotificationsArray({ isPositive: false, text: 'Failed to load current username and password for tnsName: ' + tnsName });
             return;
         }
         const usernamePasswordObject = result.value;
-        this.setState({ credentials: usernamePasswordObject});
+        this.setState({ credentials: usernamePasswordObject });
     }
 
-    registerIpcListeners(){
-        ipcRenderer.on(rpcNames.SET_USERNAME_PASSWORD_BY_TNS_NAME.reqName, (event, arg) => {
+    registerIpcListeners() {
+        ipcRenderer.on(rpcNames.SET_USERNAME_PASSWORD_BY_TNS_NAME.respName, (event, arg) => {
             if (arg.status === Constants.SUCCESS_MESSAGE) {
                 this.props.addMessageToNotificationsArray({ isPositive: true, text: arg.value });
             } else if (arg.status === Constants.FAILURE_MESSAGE) {
-              this.props.addMessageToNotificationsArray({ isPositive: false, text: arg.value });
+                this.props.addMessageToNotificationsArray({ isPositive: false, text: arg.value });
             }
-          });
+        });
     }
 
-    removeAllIpcListeners(){
+    removeAllIpcListeners() {
         console.log('connection Component will unmount called.');
-        
-            //we must deregister all IPCRenderer listeners here
+
+        //we must deregister all IPCRenderer listeners here
         ipcRenderer.removeAllListeners([rpcNames.SET_USERNAME_PASSWORD_BY_TNS_NAME.respName]);
+    }
+
+    isUserNameInvalid(){
+        return this.state.credentials.userName === '';
+    }
+
+    isPasswordInvalid(){
+        return this.state.credentials.password === '';
     }
 }
 

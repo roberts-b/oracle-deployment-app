@@ -4,6 +4,7 @@ var {getAllTnsNames} = require('../tns_operations/parse-tnsfile.js');
 var settingsHelper = require('../helpers/settings-helper');
 const constants = require('../../src/constants/constants.js');
 const rpcNames = require('../../src/constants/rpc-names.js');
+const {validateConnection} = require('../db_operations/validate-connection.js');
 
 ipcMain.on(rpcNames.GET_ALL_TNS_NAMES.reqName, (event, args) => { 
     log.info('get_all_tns_async received '); 
@@ -44,9 +45,24 @@ ipcMain.on(rpcNames.GET_ALL_TNS_NAMES.reqName, (event, args) => {
  ipcMain.on(rpcNames.SET_USERNAME_PASSWORD_BY_TNS_NAME.reqName, (event, args) => { 
     log.info('set_username_password_by_tns_name_sync received ', args); 
 
-    //TODO: later add check if username password is valid (can connect to DB with those credentials)
+    //check if username and password are already preset,then skip connection check and also return success message
+    let alreadyUsedUsernamePassword =  settingsHelper.getUserNamePasswordByTnsName(args.tnsName);
 
-    let result =  settingsHelper.setUserNamePasswordByTnsName(args);
-    log.info('set_username_password_by_tns_name_async returning: ', result);
-    event.sender.send(rpcNames.SET_USERNAME_PASSWORD_BY_TNS_NAME.respName, {status: constants.SUCCESS_MESSAGE, value: result});
+    if(args.userName === alreadyUsedUsernamePassword.userName && args.password === alreadyUsedUsernamePassword.password){
+        log.info('Provided ',args, ' are already used in system so skipping connection check and setting logic');
+        event.sender.send(rpcNames.SET_USERNAME_PASSWORD_BY_TNS_NAME.respName, {status: constants.SUCCESS_MESSAGE, value: 'Provided username/password are already used for '+args.tnsName});
+        return;
+    }
+
+    validateConnection(args).then(function(validationResult){
+        log.info('validateConnection returned value: ', validationResult);
+        let result =  settingsHelper.setUserNamePasswordByTnsName(args);
+        log.info('set_username_password_by_tns_name_async returning: ', result);
+        event.sender.send(rpcNames.SET_USERNAME_PASSWORD_BY_TNS_NAME.respName, {status: constants.SUCCESS_MESSAGE, value: result});
+    }).catch(function(error){
+        log.error('tnsListener received from set_username_password_by_tns_name_async reply: ', error);
+        event.sender.send(rpcNames.SET_USERNAME_PASSWORD_BY_TNS_NAME.respName, {status: constants.FAILURE_MESSAGE, value: error.message});
+    });
+
+    
  }); 
