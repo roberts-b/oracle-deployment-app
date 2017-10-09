@@ -44,7 +44,7 @@ exports.validateConnection = function (connectionParamsObject) {
                             });
                             return;
                         };
-                        log.info(result.rows);
+                        log.info('validate connection result for select SYSDATE from dual: ',result.rows);
                         doRelease(connection).catch(function (error) {
                             reject(Error(error));
                         });

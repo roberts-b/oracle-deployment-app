@@ -71,7 +71,7 @@ function createWindow() {
     //    'set_current_tns_sync',
     //    'getDDL_async'
     //   ]);
-    // console.log('mainWindow.on(closed) all RPC listeners unregistered');
+    // log.info('mainWindow.on(closed) all RPC listeners unregistered');
   });
 
 

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Message, Modal, Button } from 'semantic-ui-react';
 import PropTypes from 'prop-types';
+const log = require('electron-log');
 
 class ErrorSuccessModalComponent extends React.Component {
 
@@ -13,7 +14,7 @@ class ErrorSuccessModalComponent extends React.Component {
             >
                 <Modal.Content>
                     {this.props.notificationsArray.map((value, i) => {
-                        console.log(value);
+                        log.info(value);
                         return <Message key={i} negative={!value.isPositive} positive={value.isPositive}>
                             <Message.Header key={i}>{value.isPositive ? 'SUCCESS' : 'ERROR'}</Message.Header>
                             <p>{value.text}</p>

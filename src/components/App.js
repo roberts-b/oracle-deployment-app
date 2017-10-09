@@ -7,6 +7,7 @@ import { Button, Container, Header, TextArea } from 'semantic-ui-react';
 import Constants from '../constants/constants.js';
 import rpcNames from '../constants/rpc-names.js';
 import ErrorSuccessModalComponent from './basic/error-success-modal.js';
+const log = require('electron-log');
 
 
 class App extends React.Component {
@@ -45,7 +46,7 @@ class App extends React.Component {
   };
 
   requestDDL() {
-    console.log('request DDL button clicked');
+    log.info('request DDL button clicked');
     // args['objectType'], args['objectName'], args['dbSchema']
     ipcRenderer.send(rpcNames.GET_DDL.reqName, {
       objectType: 'VIEW',
@@ -62,12 +63,12 @@ class App extends React.Component {
   }
 
   closeHandlerFunc() {
-    console.log('Close handler clicked!');
+    log.info('Close handler clicked!');
     this.setState({ notificationsArray: [] });
   }
 
   addMessageToNotificationsArray(message) {
-    console.log('addMessageToNotificationsArray adding new error message: ', message);
+    log.info('addMessageToNotificationsArray adding new error message: ', message);
     let notificationsArray = this.state.notificationsArray;
     notificationsArray.push(message);
     this.setState({ notificationsArray: notificationsArray });
@@ -75,7 +76,7 @@ class App extends React.Component {
 
   registerIpcListeners() {
     ipcRenderer.on(rpcNames.GET_DDL.respName, (event, arg) => {
-      console.log(arg);
+      log.info(arg);
       if (arg.status === Constants.SUCCESS_MESSAGE) {
         this.setState({ ddl_value: arg.value, isLoading: false });
       } else if (arg.status === Constants.FAILURE_MESSAGE) {
@@ -86,7 +87,7 @@ class App extends React.Component {
   }
 
   componentWillUnmount() {
-    console.log('Component will unmount called.');
+    log.info('Component will unmount called.');
 
     //we must deregister all IPCRenderer listeners here
     ipcRenderer.removeAllListeners([rpcNames.GET_DDL.respName]);
