@@ -1,25 +1,14 @@
 var oracledb = require('oracledb');
 var log = require('electron-log');
-var {doRelease, getConnectionParametersObject } = require('../helpers/db-helpers.js');
+var { doRelease, getConnectionParametersObject } = require('../helpers/db-helpers.js');
 
 
 // Get a non-pooled connection
-exports.validateConnection = function (connectionParamsObject) {
+exports.getUniqueObjectTypes = function () {
     var connectionParams = {};
 
-    if (connectionParamsObject) {
-        log.info('validating with provided connection object', connectionParamsObject);
-
-        connectionParams = {
-            user: connectionParamsObject.userName,
-            password: connectionParamsObject.password,
-            connectString: connectionParamsObject.tnsName,
-        }
-
-    } else {
-        log.info('connection object is null so using getConnectionParametersObject() function');
-        connectionParams = getConnectionParametersObject();
-    }
+    log.info('connection object is null so using getConnectionParametersObject() function');
+    connectionParams = getConnectionParametersObject();
 
     log.info(connectionParams);
     return new Promise(function (resolve, reject) {
@@ -33,8 +22,8 @@ exports.validateConnection = function (connectionParamsObject) {
                 }
 
                 connection.execute(
-
-                    "select SYSDATE from dual",
+                    "SELECT unique(OBJECT_TYPE) FROM ALL_OBJECTS where OWNER = :owner_bv",
+                    [connectionParams.user.toUpperCase()],
                     function (err, result) {
                         if (err) {
                             log.error(err.message);
@@ -44,12 +33,11 @@ exports.validateConnection = function (connectionParamsObject) {
                             });
                             return;
                         };
-                        log.info('validate connection result for select SYSDATE from dual: ',result.rows);
+                        log.info('getUniqueObjectTypes : ', result);
                         doRelease(connection).catch(function (error) {
                             reject(Error(error));
                         });
-                        resolve('Connection was created successfully with params: username: ' + connectionParams.user
-                            + ' password: ' + connectionParams.password + ' connectString: ' + connectionParams.connectString);
+                        resolve(result.rows);
                     });
             });
     });

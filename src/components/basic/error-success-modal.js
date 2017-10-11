@@ -10,8 +10,7 @@ class ErrorSuccessModalComponent extends React.Component {
             <Modal
                 dimmer='blurring'
                 open={this.props.notificationsArray.length > 0}
-                onClose={this.props.closeHandler}
-            >
+                onClose={this.props.closeHandler}>
                 <Modal.Content>
                     {this.props.notificationsArray.map((value, i) => {
                         log.info(value);

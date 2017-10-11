@@ -3,10 +3,11 @@ import 'semantic-ui-css/semantic.min.css';
 import React, { Component } from 'react';
 const { ipcRenderer } = require('electron');
 import ConnectionComponent from './connection/connection-component.js';
-import { Button, Container, Header, TextArea } from 'semantic-ui-react';
+import { Button, Container, Header, TextArea, Segment } from 'semantic-ui-react';
 import Constants from '../constants/constants.js';
 import rpcNames from '../constants/rpc-names.js';
 import ErrorSuccessModalComponent from './basic/error-success-modal.js';
+import DbStructureComponent from './database_structure/db-structure-component.js';
 const log = require('electron-log');
 
 
@@ -27,20 +28,31 @@ class App extends React.Component {
 
   render() {
     return (
-      <Container>
+      <Container fluid>
         <ErrorSuccessModalComponent
-          notificationsArray={this.state.notificationsArray}
-          closeHandler={this.closeHandlerFunc}
+                notificationsArray={this.state.notificationsArray}
+                closeHandler={this.closeHandlerFunc}
         />
-        <Container>
-          <Header as='h1'>DDL requesting page</Header>
-          <ConnectionComponent addMessageToNotificationsArray={this.addMessageToNotificationsArray} />
-          <p>Press request DDL to get DDL for statistics view</p>
-          <Button loading={this.state.isLoading} disabled={this.state.isLoading} onClick={this.requestDDL}>Request DDL</Button>
-        </Container>
-        <Container>
-          <TextArea value={this.state.ddl_value} />
-        </Container>
+        <Segment.Group horizontal compact>
+          <Segment compact className='dbStructureSegment'>
+            <DbStructureComponent addMessageToNotificationsArray={this.addMessageToNotificationsArray}/>
+          </Segment>
+          <Segment >
+            <Segment.Group>
+              <Segment>
+                <Header as='h1'>DDL requesting page</Header>
+                <ConnectionComponent addMessageToNotificationsArray={this.addMessageToNotificationsArray} />
+              </Segment>
+              <Segment>
+                <Header as='h1'>Press request DDL to get DDL for statistics view</Header>
+                <Button loading={this.state.isLoading} disabled={this.state.isLoading} onClick={this.requestDDL}>Request DDL</Button>
+              <Container>
+                <TextArea value={this.state.ddl_value} />
+              </Container>
+            </Segment>
+            </Segment.Group>
+          </Segment>
+        </Segment.Group>
       </Container>
     );
   };

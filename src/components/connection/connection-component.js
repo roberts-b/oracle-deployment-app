@@ -34,7 +34,7 @@ class ConnectionComponent extends React.Component {
 
     render() {
         return (
-            <Segment.Group horizontal>
+            <Segment.Group horizontal raised size='tiny' compact>
                 <Segment inverted color='grey'>
                     <Dropdown
                         placeholder='Select connection ...'

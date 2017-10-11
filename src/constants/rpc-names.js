@@ -36,4 +36,10 @@ module.exports = {
 		respName: 'getDDL_response_async'
 	},
 
+	GET_UNIQUE_OBJECT_TYPES: {
+		type: constants.ASYNC_RPC_TYPE_NAME,
+		reqName: 'getUnique_object_types_async',
+		respName: 'getUnique_object_types_response_async'
+	},
+
 };
