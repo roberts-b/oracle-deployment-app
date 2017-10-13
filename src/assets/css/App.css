@@ -4,20 +4,19 @@ textarea {
   min-height: 600px;
 }
 
-.dbStructureGridColumn{
-  padding: 0px !important;
-}
-
 .dbStructureSegment{
   max-width: 400px;
   height: 100%;
   overflow:scroll; 
   width: 100%!important;
+  transform: translate3d(0,0,0);
 }
 
 .MainWorkingAreaSegment{
   height: 100%;
   overflow:scroll; 
+  transform: translate3d(0,0,0);
+  
 }
 
 .ui.fluid.container.MainContainer{
@@ -31,4 +30,20 @@ textarea {
 
 .rootElementCss{
   height: 100%;
+}
+
+.ui.styled.accordion .content.bdStructureAccordionContent{
+  height: 100%;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.ui.compact.segments .segment.segmentAroundMenuItem{
+  border-radius: .28571429rem;
+  overflow-wrap: break-word;
+  padding: 0px;
+}
+
+.ui.compact.segments .segment.structureComponentSegmentAroundAccordion{
+  padding: 0px;
 }
