@@ -1,7 +1,7 @@
 
 textarea {
-  width: 700px;
-  height: 1000px;
+  min-width: 600px;
+  min-height: 600px;
 }
 
 .dbStructureGridColumn{
@@ -9,5 +9,26 @@ textarea {
 }
 
 .dbStructureSegment{
-  max-width: 300px;
+  max-width: 400px;
+  height: 100%;
+  overflow:scroll; 
+  width: 100%!important;
+}
+
+.MainWorkingAreaSegment{
+  height: 100%;
+  overflow:scroll; 
+}
+
+.ui.fluid.container.MainContainer{
+  height: 100%;
+}
+
+.ui.horizontal.segments.mainSegments{
+  height: 100%;
+  margin: 0px;
+}
+
+.rootElementCss{
+  height: 100%;
 }

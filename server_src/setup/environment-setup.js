@@ -38,7 +38,7 @@ settingsHelper.presetDefaultTnsNameIfNeeded();
 
 let defaultLogLevel = 'error';
 
-if (process.defaultApp || /[\\/]electron-prebuilt[\\/]/.test(process.execPath) || /[\\/]electron[\\/]/.test(process.execPath)) {
+if ((process.defaultApp || /[\\/]electron-prebuilt[\\/]/.test(process.execPath) || /[\\/]electron[\\/]/.test(process.execPath)) && process.argv.indexOf('--noDevServer') === -1) {
     //if running from dev environment set default log level to info
     defaultLogLevel = 'info';
 }

@@ -42,4 +42,10 @@ module.exports = {
 		respName: 'getUnique_object_types_response_async'
 	},
 
+	GET_ALL_OBJECTS_BY_OBJECT_TYPE: {
+		type: constants.ASYNC_RPC_TYPE_NAME,
+		reqName: 'getAll_objects_by_object_type_async',
+		respName: 'getAll_objects_by_object_type_response_async'
+	},
+
 };

@@ -1,6 +1,7 @@
 'use strict';
 
 require('./server_src/setup/environment-setup.js');
+// var {getAllObjectsByObjectType} = require('./server_src/db_operations/db-structure-operations.js');
 
 // Import parts of electron to use
 var path = require('path');
@@ -50,7 +51,7 @@ function createWindow() {
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
     // Open the DevTools automatically if developing
-    if ( dev ) {
+    if ( dev && process.argv.indexOf('--noDevServer') === -1 ) {
       mainWindow.webContents.openDevTools();
     }
     

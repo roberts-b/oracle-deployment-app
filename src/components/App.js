@@ -28,16 +28,16 @@ class App extends React.Component {
 
   render() {
     return (
-      <Container fluid>
+      <Container fluid className='MainContainer'>
         <ErrorSuccessModalComponent
                 notificationsArray={this.state.notificationsArray}
                 closeHandler={this.closeHandlerFunc}
         />
-        <Segment.Group horizontal compact>
+        <Segment.Group horizontal compact className='mainSegments'>
           <Segment compact className='dbStructureSegment'>
             <DbStructureComponent addMessageToNotificationsArray={this.addMessageToNotificationsArray}/>
           </Segment>
-          <Segment >
+          <Segment className='MainWorkingAreaSegment'>
             <Segment.Group>
               <Segment>
                 <Header as='h1'>DDL requesting page</Header>
