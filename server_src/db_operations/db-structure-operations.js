@@ -17,7 +17,7 @@ exports.getUniqueObjectTypes = function () {
                     reject(Error(err));
                     return;
                 }
-
+                log.info('getUniqueObjectTypes executing query: SELECT unique(OBJECT_TYPE) FROM ALL_OBJECTS where OWNER = :owner_bv');
                 connection.execute(
                     "SELECT unique(OBJECT_TYPE) FROM ALL_OBJECTS where OWNER = :owner_bv",
                     [connectionParams.user.toUpperCase()],
@@ -54,26 +54,7 @@ exports.getAllObjectsByObjectType = function (objectType) {
                     reject(Error(err));
                     return;
                 }
-
-                // connection.execute(
-                //     "SELECT OBJECT_NAME, STATUS FROM ALL_OBJECTS where OWNER= :owner_bv and OBJECT_TYPE=:object_type_bv order by OBJECT_NAME",
-                //     [connectionParams.user.toUpperCase(), objectType],
-                //     {resultSet: false, maxRows: 1000},
-                //     function (err, result) {
-                //         if (err) {
-                //             log.error(err.message);
-                //             reject(Error(error));
-                //             doRelease(connection).catch(function (error) {
-                //                 reject(Error(error));
-                //             });
-                //             return;
-                //         };
-                //         log.info('getAllObjectsByObjectType : ', result);
-                //         doRelease(connection).catch(function (error) {
-                //             reject(Error(error));
-                //         });
-                //         resolve(result.rows);
-                //     });
+                log.info('getAllObjectsByObjectType executing query: SELECT OBJECT_NAME, STATUS FROM ALL_OBJECTS where OWNER= :owner_bv and OBJECT_TYPE=:object_type_bv order by OBJECT_NAME');
 
                 queryAll(connection,
                     "SELECT OBJECT_NAME, STATUS FROM ALL_OBJECTS where OWNER= :owner_bv and OBJECT_TYPE=:object_type_bv order by OBJECT_NAME",

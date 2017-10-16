@@ -47,3 +47,7 @@ textarea {
 .ui.compact.segments .segment.structureComponentSegmentAroundAccordion{
   padding: 0px;
 }
+
+.ui.vertical.menu .item.dbStructureMainAccordion{
+  padding-right: 0px;
+}

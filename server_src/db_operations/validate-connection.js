@@ -31,7 +31,7 @@ exports.validateConnection = function (connectionParamsObject) {
                     reject(Error(err));
                     return;
                 }
-
+                log.info('getAllObjectsByObjectType executing query: select SYSDATE from dual');
                 connection.execute(
 
                     "select SYSDATE from dual",

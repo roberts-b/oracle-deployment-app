@@ -13,6 +13,8 @@ const log = require('electron-log');
 
 class App extends React.Component {
 
+  dbStructureReference;
+
   constructor(props) {
     super(props);
     this.bindComponentListeners();
@@ -35,13 +37,20 @@ class App extends React.Component {
         />
         <Segment.Group horizontal compact className='mainSegments'>
           <Segment compact className='dbStructureSegment'>
-            <DbStructureComponent addMessageToNotificationsArray={this.addMessageToNotificationsArray}/>
+            <DbStructureComponent 
+            ref={(dbStructureReference)=>{this.dbStructureReference = dbStructureReference;}}
+            addMessageToNotificationsArray={this.addMessageToNotificationsArray}
+            />
           </Segment>
           <Segment className='MainWorkingAreaSegment'>
             <Segment.Group>
               <Segment>
                 <Header as='h1'>DDL requesting page</Header>
-                <ConnectionComponent addMessageToNotificationsArray={this.addMessageToNotificationsArray} />
+                <ConnectionComponent 
+                  addMessageToNotificationsArray={this.addMessageToNotificationsArray}
+                  refreshDbStructureComponent = {this.refreshDbStructureComponent}
+                  handleDbStructureItemSelection = {this.handleDbStructureItemSelection}
+                   />
               </Segment>
               <Segment>
                 <Header as='h1'>Press request DDL to get DDL for statistics view</Header>
@@ -72,6 +81,7 @@ class App extends React.Component {
     this.requestDDL = this.requestDDL.bind(this);
     this.closeHandlerFunc = this.closeHandlerFunc.bind(this);
     this.addMessageToNotificationsArray = this.addMessageToNotificationsArray.bind(this);
+    this.refreshDbStructureComponent = this.refreshDbStructureComponent.bind(this);
   }
 
   closeHandlerFunc() {
@@ -84,6 +94,14 @@ class App extends React.Component {
     let notificationsArray = this.state.notificationsArray;
     notificationsArray.push(message);
     this.setState({ notificationsArray: notificationsArray });
+  }
+
+  handleDbStructureItemSelection(selectedItem){
+    log.info('handleDbStructureItemSelection selected Item: ',selectedItem);
+  }
+
+  refreshDbStructureComponent(){
+    this.dbStructureReference.getDatabaseObjectNames();
   }
 
   registerIpcListeners() {

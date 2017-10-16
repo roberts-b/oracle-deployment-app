@@ -23,7 +23,7 @@ class ConnectionComponent extends React.Component {
         this.registerIpcListeners();
         this.getAllTnsNames();
         this.getCurrentTnsName();
-        
+
     }
 
     componentWillUnmount() {
@@ -61,7 +61,7 @@ class ConnectionComponent extends React.Component {
                                 name='password'
                                 value={this.state.credentials.password}
                                 onChange={this.handleInputChange} />
-                            <Button onClick={this.onClickTestConnection} disabled={this.isUserNameInvalid() || this.isPasswordInvalid()} content="Test"/>
+                            <Button onClick={this.onClickTestConnection} disabled={this.isUserNameInvalid() || this.isPasswordInvalid()} content="Test" />
                             <Form.Button disabled={this.isUserNameInvalid() || this.isPasswordInvalid()} content='Save' />
                         </Form.Group>
                     </Form>
@@ -70,7 +70,7 @@ class ConnectionComponent extends React.Component {
         );
     }
 
-    onClickTestConnection(event){
+    onClickTestConnection(event) {
         //prevent default form submission
         event.preventDefault();
         log.info('onCLick');
@@ -98,10 +98,10 @@ class ConnectionComponent extends React.Component {
 
             this.setState({ currentTnsname: newValue });
 
-            this.setCurrentUserNamePassword(newValue);
-
-            let isSuccess = Constants.SUCCESS_MESSAGE === result.status;
-            // this.props.addMessageToNotificationsArray({ isPositive: isSuccess, text: isSuccess ? 'Successfully updated preferences to use ' + newValue : 'Failed to update preferences to use ' + newValue });
+            let operationStatus = this.setCurrentUserNamePassword(newValue);
+            if (operationStatus === Constants.SUCCESS_MESSAGE) {
+                this.props.refreshDbStructureComponent();
+            }
         } else if (targetName === 'userName' || targetName === 'password') {
             this.setCredentialValueToState(newValue, targetName);
         }
@@ -171,16 +171,19 @@ class ConnectionComponent extends React.Component {
         log.info('setCurrentUserNamePassword initialValue = ', result);
         if (result.status === Constants.FAILURE_MESSAGE) {
             this.props.addMessageToNotificationsArray({ isPositive: false, text: 'Failed to load current username and password for tnsName: ' + tnsName });
-            return;
+            return result.status;
         }
         const usernamePasswordObject = result.value;
         this.setState({ credentials: usernamePasswordObject });
+        return result.status;
     }
 
     registerIpcListeners() {
         ipcRenderer.on(rpcNames.SET_USERNAME_PASSWORD_BY_TNS_NAME.respName, (event, arg) => {
             if (arg.status === Constants.SUCCESS_MESSAGE) {
                 this.props.addMessageToNotificationsArray({ isPositive: true, text: arg.value });
+                //refresh db structure
+                this.props.refreshDbStructureComponent();
             } else if (arg.status === Constants.FAILURE_MESSAGE) {
                 this.props.addMessageToNotificationsArray({ isPositive: false, text: arg.value });
             }
@@ -203,11 +206,11 @@ class ConnectionComponent extends React.Component {
         ipcRenderer.removeAllListeners([rpcNames.TEST_CONNECTION.respName]);
     }
 
-    isUserNameInvalid(){
+    isUserNameInvalid() {
         return this.state.credentials.userName === '';
     }
 
-    isPasswordInvalid(){
+    isPasswordInvalid() {
         return this.state.credentials.password === '';
     }
 }
@@ -215,6 +218,7 @@ class ConnectionComponent extends React.Component {
 
 ConnectionComponent.PropTypes = {
     addMessageToNotificationsArray: PropTypes.func.isRequired,
+    refreshDbStructureComponent: PropTypes.func.isRequired
 }
 
 

@@ -15,7 +15,11 @@ class DbStructureComponent extends React.Component {
 
         this.state = {
             structureItemsArray: [],
-            isLoading: false
+            isLoading: false,
+            currentlySelectedItem: {
+                groupId: -1,
+                subGroupId: -1
+            }
         }
     }
 
@@ -35,9 +39,9 @@ class DbStructureComponent extends React.Component {
         return (
             <Container fluid>
                 <Segment compact className='structureComponentSegmentAroundAccordion' basic loading={this.state.isLoading}>
-                    <Accordion styled as={Menu} vertical fluid>
+                    <Accordion className='dbStructureMainAccordion' styled as={Menu} vertical fluid>
                         {this.state.structureItemsArray.map((value, i) => {
-                            return <Menu.Item key={i}>
+                            return <Menu.Item className='dbStructureMainAccordion' key={i}>
                                 <Accordion.Title onClick={this.handleAccordionTitleClick}
                                     content={(<Label color='brown' >{value.itemName}</Label>)}
                                     index={i} active={value.active}>
@@ -45,7 +49,8 @@ class DbStructureComponent extends React.Component {
                                 </Accordion.Title>
                                 <Accordion.Content className='bdStructureAccordionContent' active={value.active}>
                                     <List
-                                        width={300}
+                                        
+                                        width={320}
                                         height={400}
                                         rowCount={value.itemValues.length}
                                         rowHeight={40}
@@ -60,9 +65,8 @@ class DbStructureComponent extends React.Component {
                                                 return (
                                                     <div key={key} style={style}>
                                                         <Segment className='segmentAroundMenuItem' key={key}>
-
-                                                            <Menu.Item active={value.itemValues[index].active} as='a' key={key}>
-                                                                <Icon color={value.itemValues[index].valid === 'VALID' ? 'green' : 'red'}
+                                                            <Menu.Item index={index} active={value.itemValues[index].active} as='a' key={key} onClick={this.handleMenuItemSelection}>
+                                                                <Icon content={i} color={value.itemValues[index].valid === 'VALID' ? 'green' : 'red'}
                                                                     name={value.itemValues[index].valid === 'VALID' ? 'check circle' : 'remove circle'} />
                                                                 {value.itemValues[index].name}
                                                             </Menu.Item>
@@ -84,12 +88,13 @@ class DbStructureComponent extends React.Component {
 
     bindComponentListeners() {
         this.handleAccordionTitleClick = this.handleAccordionTitleClick.bind(this);
+        this.handleMenuItemSelection = this.handleMenuItemSelection.bind(this);
 
     }
 
     handleAccordionTitleClick(e, titleProps) {
         const index = titleProps.index;
-        log.info('handleAccordionTitleClick titleProps: ', index);
+        // log.info('handleAccordionTitleClick titleProps: ', index);
         let structureItemsArray = this.state.structureItemsArray;
         const active = structureItemsArray[index].active;
 
@@ -111,6 +116,39 @@ class DbStructureComponent extends React.Component {
         this.setState({ structureItemsArray: structureItemsArray });
     }
 
+    handleMenuItemSelection(event, data){
+
+        //get stored parent group id from  <Icon content={i} value
+        const parentGroupId = data.children[0].props.content;
+
+        //get subgroup id from index in data value <Menu.Item index={index}
+        const subGroupId = data.index;
+
+        console.log('handleMenuItemSelection parentGroupId: ',parentGroupId, ' subGroupId: ', subGroupId);
+
+        //set this item as active
+        let structureItemsArray = this.state.structureItemsArray;
+        structureItemsArray[parentGroupId].itemValues[subGroupId].active = true;
+
+        //save/update also ids to active item in state
+        // currentlySelectedItem: {
+        //     groupId: -1,
+        //     subGroupId: -1
+        // }
+        const currentlySelectedItem = this.state.currentlySelectedItem;
+        //initial state is -1 (set in constructor) so we are checking if there was initial state or not
+        //we must remove old selected item only if there was not initial state (something was already selected before)
+        if(currentlySelectedItem.groupId != -1 && currentlySelectedItem.subGroupId != -1){
+            structureItemsArray[currentlySelectedItem.groupId].itemValues[currentlySelectedItem.subGroupId].active = false;
+        }
+
+        this.setCurrentlySelectedItemIdsToState(parentGroupId,subGroupId);
+        this.setState({currentlySelectedItem: currentlySelectedItem});
+
+        //additionally we must send request to parent component that selection happened
+
+    }
+
     registerIpcListeners() {
         ipcRenderer.on(rpcNames.GET_UNIQUE_OBJECT_TYPES.respName, (event, arg) => {
             log.info('ipcRenderer.on(rpcNames.GET_UNIQUE_OBJECT_TYPES');
@@ -123,6 +161,7 @@ class DbStructureComponent extends React.Component {
                 this.props.addMessageToNotificationsArray({ isPositive: false, text: arg.value });
             }
             this.setState({ isLoading: false });
+            this.setCurrentlySelectedItemIdsToState(-1, -1);
         });
 
         ipcRenderer.on(rpcNames.GET_ALL_OBJECTS_BY_OBJECT_TYPE.respName, (event, arg) => {
@@ -152,7 +191,7 @@ class DbStructureComponent extends React.Component {
     }
 
     mapDbObjectNamesToState(res) {
-        log.info('mapDbObjectNamesToState', res);
+        // log.info('mapDbObjectNamesToState', res);
         let valueArray = res.value;
         let structureItemsArray = [];
         valueArray.map((value, i) => {
@@ -190,10 +229,18 @@ class DbStructureComponent extends React.Component {
         // log.info('mapDbSubObjectsToState will put to state structureItemsArray: ', structureItemsArray);
         this.setState({ structureItemsArray: structureItemsArray });
     }
+
+    setCurrentlySelectedItemIdsToState(groupId, subGroupId){
+        const currentlySelectedItem = this.state.currentlySelectedItem;
+        currentlySelectedItem.groupId = groupId;
+        currentlySelectedItem.subGroupId = subGroupId;
+        this.setState({currentlySelectedItem: currentlySelectedItem});
+    }
 }
 
 DbStructureComponent.PropTypes = {
-    addMessageToNotificationsArray: PropTypes.func.isRequired
+    addMessageToNotificationsArray: PropTypes.func.isRequired,
+    handleDbStructureItemSelection: PropTypes.func.isRequired
 }
 
 
