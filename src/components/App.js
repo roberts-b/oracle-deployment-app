@@ -8,6 +8,7 @@ import Constants from '../constants/constants.js';
 import rpcNames from '../constants/rpc-names.js';
 import ErrorSuccessModalComponent from './basic/error-success-modal.js';
 import DbStructureComponent from './database_structure/db-structure-component.js';
+import MainAreaComponent from './main_area/main-area-component.js'
 const log = require('electron-log');
 
 
@@ -19,9 +20,7 @@ class App extends React.Component {
     super(props);
     this.bindComponentListeners();
     this.state = {
-      ddl_value: '',
       notificationsArray: [],
-      isLoading: false
     }
   }
   componentDidMount() {
@@ -45,7 +44,6 @@ class App extends React.Component {
           <Segment className='MainWorkingAreaSegment'>
             <Segment.Group>
               <Segment>
-                <Header as='h1'>DDL requesting page</Header>
                 <ConnectionComponent 
                   addMessageToNotificationsArray={this.addMessageToNotificationsArray}
                   refreshDbStructureComponent = {this.refreshDbStructureComponent}
@@ -53,11 +51,9 @@ class App extends React.Component {
                    />
               </Segment>
               <Segment>
-                <Header as='h1'>Press request DDL to get DDL for statistics view</Header>
-                <Button loading={this.state.isLoading} disabled={this.state.isLoading} onClick={this.requestDDL}>Request DDL</Button>
-              <Container>
-                <TextArea value={this.state.ddl_value} />
-              </Container>
+              <MainAreaComponent
+              addMessageToNotificationsArray={this.addMessageToNotificationsArray}
+               />
             </Segment>
             </Segment.Group>
           </Segment>
@@ -66,19 +62,9 @@ class App extends React.Component {
     );
   };
 
-  requestDDL() {
-    log.info('request DDL button clicked');
-    // args['objectType'], args['objectName'], args['dbSchema']
-    ipcRenderer.send(rpcNames.GET_DDL.reqName, {
-      objectType: 'VIEW',
-      objectName: 'TW_CLA_STATISTICS_AV',
-      dbSchema: 'TIA'
-    });
-    this.setState({ isLoading: true });
-  };
+  
 
   bindComponentListeners() {
-    this.requestDDL = this.requestDDL.bind(this);
     this.closeHandlerFunc = this.closeHandlerFunc.bind(this);
     this.addMessageToNotificationsArray = this.addMessageToNotificationsArray.bind(this);
     this.refreshDbStructureComponent = this.refreshDbStructureComponent.bind(this);
@@ -105,15 +91,7 @@ class App extends React.Component {
   }
 
   registerIpcListeners() {
-    ipcRenderer.on(rpcNames.GET_DDL.respName, (event, arg) => {
-      log.info(arg);
-      if (arg.status === Constants.SUCCESS_MESSAGE) {
-        this.setState({ ddl_value: arg.value, isLoading: false });
-      } else if (arg.status === Constants.FAILURE_MESSAGE) {
-        this.addMessageToNotificationsArray({ isPositive: false, text: arg.value });
-        this.setState({ isLoading: false });
-      }
-    });
+    
   }
 
   componentWillUnmount() {

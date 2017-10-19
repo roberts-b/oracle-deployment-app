@@ -49,7 +49,7 @@ class DbStructureComponent extends React.Component {
                                 </Accordion.Title>
                                 <Accordion.Content className='bdStructureAccordionContent' active={value.active}>
                                     <List
-                                        
+
                                         width={320}
                                         height={400}
                                         rowCount={value.itemValues.length}
@@ -65,7 +65,7 @@ class DbStructureComponent extends React.Component {
                                                 return (
                                                     <div key={key} style={style}>
                                                         <Segment className='segmentAroundMenuItem' key={key}>
-                                                            <Menu.Item index={index} active={value.itemValues[index].active} as='a' key={key} onClick={this.handleMenuItemSelection}>
+                                                            <Menu.Item className='activeMenuItemStyle' index={index} active={value.itemValues[index].active} as='a' key={key} onClick={this.handleMenuItemSelection}>
                                                                 <Icon content={i} color={value.itemValues[index].valid === 'VALID' ? 'green' : 'red'}
                                                                     name={value.itemValues[index].valid === 'VALID' ? 'check circle' : 'remove circle'} />
                                                                 {value.itemValues[index].name}
@@ -99,32 +99,31 @@ class DbStructureComponent extends React.Component {
         const active = structureItemsArray[index].active;
 
         structureItemsArray[index].active = !active;
-        
-                //fetch all objects if active is true and currently there is no items inside
-                if(structureItemsArray[index].active && structureItemsArray[index].itemValues.length === 0){
-                    //fetch values
-                    this.setState({isLoading: true});
-                    log.info('isLoading: ',this.state.isLoading);
-                    ipcRenderer.send(rpcNames.GET_ALL_OBJECTS_BY_OBJECT_TYPE.reqName,structureItemsArray[index].itemName);
-                    
-                }else if(!structureItemsArray[index].active){
-                    log.info('clearing itemValues array for ', structureItemsArray[index].itemName, ' because it was closed');
-                    structureItemsArray[index].itemValues = [];
-                }
-        
+
+        //fetch all objects if active is true and currently there is no items inside
+        if (structureItemsArray[index].active && structureItemsArray[index].itemValues.length === 0) {
+            //fetch values
+            this.setState({ isLoading: true });
+            log.info('isLoading: ', this.state.isLoading);
+            ipcRenderer.send(rpcNames.GET_ALL_OBJECTS_BY_OBJECT_TYPE.reqName, structureItemsArray[index].itemName);
+
+        } else if (!structureItemsArray[index].active) {
+            log.info('clearing itemValues array for ', structureItemsArray[index].itemName, ' because it was closed');
+            structureItemsArray[index].itemValues = [];
+        }
+
 
         this.setState({ structureItemsArray: structureItemsArray });
     }
 
-    handleMenuItemSelection(event, data){
-
+    handleMenuItemSelection(event, data) {
         //get stored parent group id from  <Icon content={i} value
         const parentGroupId = data.children[0].props.content;
 
         //get subgroup id from index in data value <Menu.Item index={index}
         const subGroupId = data.index;
 
-        console.log('handleMenuItemSelection parentGroupId: ',parentGroupId, ' subGroupId: ', subGroupId);
+        console.log('handleMenuItemSelection parentGroupId: ', parentGroupId, ' subGroupId: ', subGroupId);
 
         //set this item as active
         let structureItemsArray = this.state.structureItemsArray;
@@ -138,12 +137,15 @@ class DbStructureComponent extends React.Component {
         const currentlySelectedItem = this.state.currentlySelectedItem;
         //initial state is -1 (set in constructor) so we are checking if there was initial state or not
         //we must remove old selected item only if there was not initial state (something was already selected before)
-        if(currentlySelectedItem.groupId != -1 && currentlySelectedItem.subGroupId != -1){
-            structureItemsArray[currentlySelectedItem.groupId].itemValues[currentlySelectedItem.subGroupId].active = false;
+        if (currentlySelectedItem.groupId != -1 &&
+            currentlySelectedItem.subGroupId != -1 &&
+            (currentlySelectedItem.groupId != parentGroupId ||
+            currentlySelectedItem.subGroupId != subGroupId)) {
+                structureItemsArray[currentlySelectedItem.groupId].itemValues[currentlySelectedItem.subGroupId].active = false;
         }
 
-        this.setCurrentlySelectedItemIdsToState(parentGroupId,subGroupId);
-        this.setState({currentlySelectedItem: currentlySelectedItem});
+        this.setCurrentlySelectedItemIdsToState(parentGroupId, subGroupId);
+        this.setState({ currentlySelectedItem: currentlySelectedItem });
 
         //additionally we must send request to parent component that selection happened
 
@@ -230,11 +232,11 @@ class DbStructureComponent extends React.Component {
         this.setState({ structureItemsArray: structureItemsArray });
     }
 
-    setCurrentlySelectedItemIdsToState(groupId, subGroupId){
+    setCurrentlySelectedItemIdsToState(groupId, subGroupId) {
         const currentlySelectedItem = this.state.currentlySelectedItem;
         currentlySelectedItem.groupId = groupId;
         currentlySelectedItem.subGroupId = subGroupId;
-        this.setState({currentlySelectedItem: currentlySelectedItem});
+        this.setState({ currentlySelectedItem: currentlySelectedItem });
     }
 }
 
