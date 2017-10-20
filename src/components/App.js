@@ -14,8 +14,6 @@ const log = require('electron-log');
 
 class App extends React.Component {
 
-  dbStructureReference;
-
   constructor(props) {
     super(props);
     this.bindComponentListeners();
@@ -39,6 +37,7 @@ class App extends React.Component {
             <DbStructureComponent 
             ref={(dbStructureReference)=>{this.dbStructureReference = dbStructureReference;}}
             addMessageToNotificationsArray={this.addMessageToNotificationsArray}
+            handleSubgroupItemSelection = {this.handleSubgroupItemSelection}
             />
           </Segment>
           <Segment className='MainWorkingAreaSegment'>
@@ -52,6 +51,7 @@ class App extends React.Component {
               </Segment>
               <Segment>
               <MainAreaComponent
+              ref={(mainAreaComponentReference)=>{this.mainAreaComponentReference = mainAreaComponentReference;}}
               addMessageToNotificationsArray={this.addMessageToNotificationsArray}
                />
             </Segment>
@@ -68,6 +68,7 @@ class App extends React.Component {
     this.closeHandlerFunc = this.closeHandlerFunc.bind(this);
     this.addMessageToNotificationsArray = this.addMessageToNotificationsArray.bind(this);
     this.refreshDbStructureComponent = this.refreshDbStructureComponent.bind(this);
+    this.handleSubgroupItemSelection = this.handleSubgroupItemSelection.bind(this);
   }
 
   closeHandlerFunc() {
@@ -88,6 +89,10 @@ class App extends React.Component {
 
   refreshDbStructureComponent(){
     this.dbStructureReference.getDatabaseObjectNames();
+  }
+
+  handleSubgroupItemSelection(groupName, subGroupName){
+    this.mainAreaComponentReference.addNewTab(groupName, subGroupName);
   }
 
   registerIpcListeners() {

@@ -148,7 +148,7 @@ class DbStructureComponent extends React.Component {
         this.setState({ currentlySelectedItem: currentlySelectedItem });
 
         //additionally we must send request to parent component that selection happened
-
+        this.props.handleSubgroupItemSelection(structureItemsArray[currentlySelectedItem.groupId].itemName, structureItemsArray[currentlySelectedItem.groupId].itemValues[currentlySelectedItem.subGroupId].name);
     }
 
     registerIpcListeners() {
@@ -242,7 +242,8 @@ class DbStructureComponent extends React.Component {
 
 DbStructureComponent.PropTypes = {
     addMessageToNotificationsArray: PropTypes.func.isRequired,
-    handleDbStructureItemSelection: PropTypes.func.isRequired
+    handleDbStructureItemSelection: PropTypes.func.isRequired,
+    handleSubgroupItemSelection: PropTypes.func.isRequired
 }
 
 

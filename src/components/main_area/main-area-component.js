@@ -16,28 +16,7 @@ class MainAreaComponent extends React.Component {
         this.state = {
             isLoading: false,
             currentActiveTabId: -1,
-            tabs: [
-                {
-                    active: false,
-                    name: 'Demo tab name1',
-                    value: 'value 1'
-                },
-                {
-                    active: false,
-                    name: 'Demo tab name2',
-                    value: 'value 2'
-                },
-                {
-                    active: false,
-                    name: 'Demo tab name3',
-                    value: 'value 2'
-                },
-                {
-                    active: false,
-                    name: 'Demo tab name4',
-                    value: 'value 2'
-                }
-            ]
+            tabs: []
         }
     }
 
@@ -68,6 +47,7 @@ class MainAreaComponent extends React.Component {
         this.requestDDL = this.requestDDL.bind(this);
         this.handleMenuItemClick = this.handleMenuItemClick.bind(this);
         this.handleTabCloseIconClick = this.handleTabCloseIconClick.bind(this);
+        this.addNewTab = this.addNewTab.bind(this);
     }
 
     handleMenuItemClick(event, data) {
@@ -97,11 +77,74 @@ class MainAreaComponent extends React.Component {
         const tabsArray = this.state.tabs;
         let currentActiveTabId = this.state.currentActiveTabId;
         tabsArray.splice(id, 1);
-        if (currentActiveTabId === id) {
-            //closed active tab so lets make first tab as current active tab
-            currentActiveTabId = -1;
-        }
+        currentActiveTabId  = this.getNewActiveTabIdAndElement(tabsArray).newActiveTabId;
+        
         this.setState({ tabs: tabsArray, currentActiveTabId: currentActiveTabId });
+    }
+
+    addNewTab(groupName, subGroupName){
+        const tabsArray = this.state.tabs;
+        let currentActiveTabId = this.state.currentActiveTabId;
+        //first check if tab for this element is already opened, if yes then make it active (selected)
+        let foundElementId = this.findElementAndIdByGroupAndSubGroupName(tabsArray, groupName, subGroupName).foundElementId;
+        if(foundElementId != -1){
+            console.log('addNewTab tab with groupName: ',groupName,' and subGroupName: ',subGroupName, ' already exists with id: ', foundElementId, ' so setting it active');
+            if(foundElementId != currentActiveTabId){
+                //set current active tab only if there already was active tab
+                if(currentActiveTabId != -1){
+                    tabsArray[currentActiveTabId].active = false;
+                }
+                tabsArray[foundElementId].active = true;
+                this.setState({ tabs: tabsArray, currentActiveTabId: foundElementId });
+                
+            }
+            return;
+        }
+
+        //such tab does not exist we must add to array new tab and make it active
+
+        //first make old active tab inactive
+        if(currentActiveTabId != -1){
+            tabsArray[currentActiveTabId].active = false;
+        }
+
+        let newLength = tabsArray.push({
+            active: true,
+            groupName: groupName,
+            subGroupName: subGroupName,
+            value: ''
+        });
+        //update state
+        this.setState({ tabs: tabsArray, currentActiveTabId: newLength -1 });
+
+
+
+    }
+
+    getNewActiveTabIdAndElement(tabsArray){
+        let newActiveTabId = -1;
+        let activeElement = {};
+        tabsArray.some((element, index, array) => {
+         if(element.active){
+             newActiveTabId = index;
+             activeElement = element;
+             return true;
+         }   
+        });
+        return {newActiveTabId: newActiveTabId, activeElement: activeElement};
+    }
+
+    findElementAndIdByGroupAndSubGroupName(tabsArray, groupName, subGroupName){
+        let foundElementId = -1;
+        let activeElement = {};
+        tabsArray.some((element, index, array) => {
+         if(element.groupName === groupName && element.subGroupName === subGroupName){
+            foundElementId = index;
+             activeElement = element;
+             return true;
+         }   
+        });
+        return {foundElementId: foundElementId, activeElement: activeElement};
     }
 
     setCurrentActiveTabToFirstIfNeeded(){
@@ -125,7 +168,7 @@ class MainAreaComponent extends React.Component {
                     {
                         this.state.tabs.map((value, i) => {
                             return <Menu.Item index={i} onClick={this.handleMenuItemClick} className='TabsMenuItems' active={value.active} key={i}>
-                                {value.name}
+                                {value.subGroupName+' ('+value.groupName+')'}
                                 <Icon key={i} color='red' name='remove' onClick={(proxy, event) => { this.handleTabCloseIconClick(proxy, event, i); }} />
                             </Menu.Item>
                         })
@@ -133,7 +176,7 @@ class MainAreaComponent extends React.Component {
 
                 </Menu>
                 <Segment className='ResultsTextAreaSegment' inverted basic compact attached='bottom'>
-                    <TextArea className='MainWorkingTextArea' value={this.state.currentActiveTabId === -1 ? '' : this.state.tabs[this.state.currentActiveTabId].value} />
+                    <TextArea className='MainWorkingTextArea' value={(this.state.tabs[this.state.currentActiveTabId] === undefined) ? '' : this.state.tabs[this.state.currentActiveTabId].value} />
                 </Segment >
             </Container>
         )
@@ -145,7 +188,10 @@ class MainAreaComponent extends React.Component {
             if (arg.status === Constants.SUCCESS_MESSAGE) {
                 const currentActiveTabId = this.state.currentActiveTabId;
                 const tabs = this.state.tabs;
-                tabs[currentActiveTabId].value = arg.value;
+                if(currentActiveTabId != -1){
+                    tabs[currentActiveTabId].value = arg.value;
+                    
+                }
                 this.setState({ tabs: tabs, isLoading: false });
             } else if (arg.status === Constants.FAILURE_MESSAGE) {
                 this.addMessageToNotificationsArray({ isPositive: false, text: arg.value });
