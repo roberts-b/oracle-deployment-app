@@ -89,6 +89,7 @@ class App extends React.Component {
 
   refreshDbStructureComponent(){
     this.dbStructureReference.getDatabaseObjectNames();
+    this.mainAreaComponentReference.closeAllTabs();
   }
 
   handleSubgroupItemSelection(groupName, subGroupName){

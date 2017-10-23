@@ -4,6 +4,10 @@ import { Container, Divider, Segment, TextArea, Tab, Menu, Label, Icon, Button }
 import Constants from '../../constants/constants.js';
 import rpcNames from '../../constants/rpc-names.js';
 import PropTypes from 'prop-types';
+import {UnControlled as CodeMirror} from'react-codemirror2';
+import 'codemirror/lib/codemirror.css';
+import 'codemirror/theme/material.css';
+require ('codemirror/mode/sql/sql');
 
 var log = require('electron-log');
 
@@ -23,10 +27,13 @@ class MainAreaComponent extends React.Component {
     requestDDL() {
         log.info('request DDL button clicked');
         // args['objectType'], args['objectName'], args['dbSchema']
+        if (this.state.currentActiveTabId === -1) {
+            this.addMessageToNotificationsArray({ isPositive: false, text: 'No active tab selected so DDL request was not send !' });
+            return;
+        }
         ipcRenderer.send(rpcNames.GET_DDL.reqName, {
-            objectType: 'VIEW',
-            objectName: 'TW_CLA_STATISTICS_AV',
-            dbSchema: 'TIA'
+            objectType: this.state.tabs[this.state.currentActiveTabId].groupName,
+            objectName: this.state.tabs[this.state.currentActiveTabId].subGroupName
         });
 
         this.setState({ isLoading: true });
@@ -48,20 +55,25 @@ class MainAreaComponent extends React.Component {
         this.handleMenuItemClick = this.handleMenuItemClick.bind(this);
         this.handleTabCloseIconClick = this.handleTabCloseIconClick.bind(this);
         this.addNewTab = this.addNewTab.bind(this);
+        this.closeAllTabs = this.closeAllTabs.bind(this);
+        this.handleMenuItemOnMouseDown = this.handleMenuItemOnMouseDown.bind(this);
+        this.handleResultTextAreaChange = this.handleResultTextAreaChange.bind(this);
     }
 
     handleMenuItemClick(event, data) {
+        event.preventDefault();
         console.log('handleMenuItemClick event: ', event, ' data: ', data.index);
+        console.log(event.nativeEvent.which);
         let currentActiveTabId = this.state.currentActiveTabId;
         const tabs = this.state.tabs;
         const clickedTabIndex = data.index;
 
         //set old tab as inactivei
-        if(currentActiveTabId != -1){
+        if (currentActiveTabId != -1) {
             tabs[currentActiveTabId].active = false;
         }
-            tabs[clickedTabIndex].active = true;
-            currentActiveTabId = clickedTabIndex;
+        tabs[clickedTabIndex].active = true;
+        currentActiveTabId = clickedTabIndex;
 
 
 
@@ -69,34 +81,35 @@ class MainAreaComponent extends React.Component {
 
     }
 
-    handleTabCloseIconClick(proxy, event, id) {
-        console.log('handleTabCloseIconClick proxy:',proxy,' event: ', event, ' data: ', id);
-
-        proxy.stopPropagation();
-
-        const tabsArray = this.state.tabs;
-        let currentActiveTabId = this.state.currentActiveTabId;
-        tabsArray.splice(id, 1);
-        currentActiveTabId  = this.getNewActiveTabIdAndElement(tabsArray).newActiveTabId;
-        
-        this.setState({ tabs: tabsArray, currentActiveTabId: currentActiveTabId });
+    handleResultTextAreaChange(editor, metadata, value){
+        const tabs = this.state.tabs;
+        tabs[this.state.currentActiveTabId].value = value;
+        this.setState({tabs: tabs});
     }
 
-    addNewTab(groupName, subGroupName){
+    handleTabCloseIconClick(id, event) {
+        console.log('handleTabCloseIconClick event: ', event, ' data: ', id);
+
+        event.stopPropagation();
+
+        this.closeClickedTab(id);
+    }
+
+    addNewTab(groupName, subGroupName) {
         const tabsArray = this.state.tabs;
         let currentActiveTabId = this.state.currentActiveTabId;
         //first check if tab for this element is already opened, if yes then make it active (selected)
         let foundElementId = this.findElementAndIdByGroupAndSubGroupName(tabsArray, groupName, subGroupName).foundElementId;
-        if(foundElementId != -1){
-            console.log('addNewTab tab with groupName: ',groupName,' and subGroupName: ',subGroupName, ' already exists with id: ', foundElementId, ' so setting it active');
-            if(foundElementId != currentActiveTabId){
+        if (foundElementId != -1) {
+            console.log('addNewTab tab with groupName: ', groupName, ' and subGroupName: ', subGroupName, ' already exists with id: ', foundElementId, ' so setting it active');
+            if (foundElementId != currentActiveTabId) {
                 //set current active tab only if there already was active tab
-                if(currentActiveTabId != -1){
+                if (currentActiveTabId != -1) {
                     tabsArray[currentActiveTabId].active = false;
                 }
                 tabsArray[foundElementId].active = true;
                 this.setState({ tabs: tabsArray, currentActiveTabId: foundElementId });
-                
+
             }
             return;
         }
@@ -104,7 +117,7 @@ class MainAreaComponent extends React.Component {
         //such tab does not exist we must add to array new tab and make it active
 
         //first make old active tab inactive
-        if(currentActiveTabId != -1){
+        if (currentActiveTabId != -1) {
             tabsArray[currentActiveTabId].active = false;
         }
 
@@ -115,68 +128,109 @@ class MainAreaComponent extends React.Component {
             value: ''
         });
         //update state
-        this.setState({ tabs: tabsArray, currentActiveTabId: newLength -1 });
+        this.setState({ tabs: tabsArray, currentActiveTabId: newLength - 1 });
 
 
 
     }
 
-    getNewActiveTabIdAndElement(tabsArray){
+    closeAllTabs() {
+        this.setState({
+            isLoading: false,
+            currentActiveTabId: -1,
+            tabs: []
+        });
+    }
+
+    getNewActiveTabIdAndElement(tabsArray) {
         let newActiveTabId = -1;
         let activeElement = {};
         tabsArray.some((element, index, array) => {
-         if(element.active){
-             newActiveTabId = index;
-             activeElement = element;
-             return true;
-         }   
+            if (element.active) {
+                newActiveTabId = index;
+                activeElement = element;
+                return true;
+            }
         });
-        return {newActiveTabId: newActiveTabId, activeElement: activeElement};
+        return { newActiveTabId: newActiveTabId, activeElement: activeElement };
     }
 
-    findElementAndIdByGroupAndSubGroupName(tabsArray, groupName, subGroupName){
+    findElementAndIdByGroupAndSubGroupName(tabsArray, groupName, subGroupName) {
         let foundElementId = -1;
         let activeElement = {};
         tabsArray.some((element, index, array) => {
-         if(element.groupName === groupName && element.subGroupName === subGroupName){
-            foundElementId = index;
-             activeElement = element;
-             return true;
-         }   
+            if (element.groupName === groupName && element.subGroupName === subGroupName) {
+                foundElementId = index;
+                activeElement = element;
+                return true;
+            }
         });
-        return {foundElementId: foundElementId, activeElement: activeElement};
+        return { foundElementId: foundElementId, activeElement: activeElement };
     }
 
-    setCurrentActiveTabToFirstIfNeeded(){
-        const tabsArray = this.state.tabs;
-        let currentActiveTabId = this.state.currentActiveTabId;
-        if(currentActiveTabId === -1 && tabsArray.length > 0){
-            tabsArray[0].active = true;
-            currentActiveTabId = 0;
-            this.setState({ tabs: tabsArray, currentActiveTabId: currentActiveTabId });
+    handleMenuItemOnMouseDown(id, proxy, event) {
+        proxy.preventDefault();
+        console.log('handleMenuItemOnMouseDown event.which: ', proxy.nativeEvent.which, ' proxy: ', proxy);
+
+        if (proxy.nativeEvent.which === 2) {
+            //middle mouse button was clicked close current tab
+            this.closeClickedTab(id);
         }
     }
 
+    closeClickedTab(id) {
+        const tabsArray = this.state.tabs;
+        let currentActiveTabId = this.state.currentActiveTabId;
+        tabsArray.splice(id, 1);
+        currentActiveTabId = this.getNewActiveTabIdAndElement(tabsArray).newActiveTabId;
+
+        this.setState({ tabs: tabsArray, currentActiveTabId: currentActiveTabId });
+    }
+
+    // setCurrentActiveTabToFirstIfNeeded(){
+    //     const tabsArray = this.state.tabs;
+    //     let currentActiveTabId = this.state.currentActiveTabId;
+    //     if(currentActiveTabId === -1 && tabsArray.length > 0){
+    //         tabsArray[0].active = true;
+    //         currentActiveTabId = 0;
+    //         this.setState({ tabs: tabsArray, currentActiveTabId: currentActiveTabId });
+    //     }
+    // }
+
     render() {
+        var options = {
+            lineNumbers: true,
+            mode: 'text/x-plsql',
+            readOnly: false,
+            theme: 'material'
+		};
         return (
             <Container fluid>
-                <Button loading={this.state.isLoading} disabled={this.state.isLoading} onClick={this.requestDDL}>Request DDL</Button>
+                <Button loading={this.state.isLoading} disabled={this.state.isLoading || this.state.tabs.length === 0} onClick={this.requestDDL}>Request DDL</Button>
                 <Divider />
                 {/* <Tab menu={{ tabular: true, stackable: true, color: 'teal', size: 'tiny' }} panes={this.state.panes} renderActiveOnly={true} /> */}
 
                 <Menu className='CustomTopMenu' attached='top' tabular color='teal' size='tiny'>
                     {
                         this.state.tabs.map((value, i) => {
-                            return <Menu.Item index={i} onClick={this.handleMenuItemClick} className='TabsMenuItems' active={value.active} key={i}>
-                                {value.subGroupName+' ('+value.groupName+')'}
-                                <Icon key={i} color='red' name='remove' onClick={(proxy, event) => { this.handleTabCloseIconClick(proxy, event, i); }} />
+                            return <Menu.Item onMouseDown={this.handleMenuItemOnMouseDown.bind(this, i)} index={i} onClick={this.handleMenuItemClick} className='TabsMenuItems' active={value.active} key={i}>
+                                {value.subGroupName + ' (' + value.groupName + ')'}
+                                <Icon key={i} color='red' name='remove' onClick={this.handleTabCloseIconClick.bind(this, i)} />
                             </Menu.Item>
                         })
                     }
 
                 </Menu>
-                <Segment className='ResultsTextAreaSegment' inverted basic compact attached='bottom'>
-                    <TextArea className='MainWorkingTextArea' value={(this.state.tabs[this.state.currentActiveTabId] === undefined) ? '' : this.state.tabs[this.state.currentActiveTabId].value} />
+                <Segment disabled={this.state.tabs[this.state.currentActiveTabId] === undefined || this.state.tabs[this.state.currentActiveTabId].value === '' || this.state.isLoading}
+                loading={this.state.isLoading} 
+                className='ResultsTextAreaSegment' 
+                inverted basic compact attached='bottom'>
+                    <CodeMirror 
+                    autoCursor={false}
+                    value={(this.state.tabs[this.state.currentActiveTabId] === undefined) ? '' : this.state.tabs[this.state.currentActiveTabId].value} 
+                    onChange={this.handleResultTextAreaChange} 
+                    autoFocus={true}
+                    options={options} />
                 </Segment >
             </Container>
         )
@@ -184,17 +238,17 @@ class MainAreaComponent extends React.Component {
 
     registerIpcListeners() {
         ipcRenderer.on(rpcNames.GET_DDL.respName, (event, arg) => {
-            log.info(arg);
+            // log.info(arg);
             if (arg.status === Constants.SUCCESS_MESSAGE) {
                 const currentActiveTabId = this.state.currentActiveTabId;
                 const tabs = this.state.tabs;
-                if(currentActiveTabId != -1){
+                if (currentActiveTabId != -1) {
                     tabs[currentActiveTabId].value = arg.value;
-                    
+
                 }
                 this.setState({ tabs: tabs, isLoading: false });
             } else if (arg.status === Constants.FAILURE_MESSAGE) {
-                this.addMessageToNotificationsArray({ isPositive: false, text: arg.value });
+                this.props.addMessageToNotificationsArray({ isPositive: false, text: arg.value });
                 this.setState({ isLoading: false });
             }
         });

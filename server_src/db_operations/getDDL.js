@@ -4,11 +4,12 @@ var { parseClob, doRelease, getConnectionParametersObject } = require('../helper
 
 
 // Get a non-pooled connection
-exports.getDDLFunction = function (objectType, objectName, dbSchema) {
-    log.info(getConnectionParametersObject());
+exports.getDDLFunction = function (objectType, objectName) {
+    const connectionParamsObject = getConnectionParametersObject();
+    log.info('getDDLFunction connecting using: ',connectionParamsObject);
     return new Promise(function (resolve, reject) {
         oracledb.getConnection(
-            getConnectionParametersObject(),
+            connectionParamsObject,
             function (err, connection) {
                 if (err) {
                     log.error(err.message);
@@ -19,7 +20,7 @@ exports.getDDLFunction = function (objectType, objectName, dbSchema) {
                 var bindvars = {
                     objectType: objectType,
                     objectName: objectName,
-                    dbSchema: dbSchema,
+                    dbSchema: connectionParamsObject.user.toUpperCase(),
                     ret: { dir: oracledb.BIND_OUT, type: oracledb.CLOB }
                 };
                 connection.execute(

@@ -6,9 +6,9 @@ const rpcNames = require('../../src/constants/rpc-names.js');
 
 ipcMain.on(rpcNames.GET_DDL.reqName, (event, args) => { 
     log.info('getDDL_async received with args: '+ args); 
-    getDDLFunction(args['objectType'], args['objectName'], args['dbSchema']).
+    getDDLFunction(args['objectType'], args['objectName']).
         then(function(result){
-            log.info('DDLListener received from getDDLFunction reply: ', result);
+            // log.info('DDLListener received from getDDLFunction reply: ', result);
             event.sender.send(rpcNames.GET_DDL.respName, {status: constants.SUCCESS_MESSAGE, value: result});
 
         }).catch(function(error){
