@@ -21,6 +21,7 @@
   height: 100%;
   overflow:scroll; 
   transform: translate3d(0,0,0);
+  max-width: 2000px;
   
 }
 
@@ -73,11 +74,16 @@
 .ui.attached:not(.message)+.ui.attached.segment:not(.top).ResultsTextAreaSegment{
   background-color: rgba(229, 229, 229, 1);
   border: none;
+  max-width: 1449px;
+  max-height: 676px;
 }
 
 .ui.disabled.segment.ResultsTextAreaSegment{
   pointer-events: none;
   text-shadow: none!important;
+  max-width: 1449px;
+  max-height: 676px;
+  
 }
 
 .ui.tabular.menu .item.TabsMenuItems{

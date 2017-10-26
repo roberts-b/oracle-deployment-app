@@ -118,4 +118,5 @@ function loadAllListeners() {
   require('./server_src/server_listeners/DDL-listener.js');
   require('./server_src/server_listeners/tns-listener.js');
   require('./server_src/server_listeners/db-structure-listener.js');
+  require('./server_src/server_listeners/file-operations-listener.js');
 }

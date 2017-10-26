@@ -48,4 +48,10 @@ module.exports = {
 		respName: 'getAll_objects_by_object_type_response_async'
 	},
 
+	SAVE_FILE: {
+		type: constants.ASYNC_RPC_TYPE_NAME,
+		reqName: 'save_file_async',
+		respName: 'save_file_response_async'
+	},
+
 };

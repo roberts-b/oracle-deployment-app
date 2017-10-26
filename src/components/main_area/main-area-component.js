@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 import { UnControlled as CodeMirror } from 'react-codemirror2';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/material.css';
+import OperationButtonsComponent from '../operation-buttons/operation-buttons-component.js';
 require('codemirror/mode/sql/sql');
 
 var log = require('electron-log');
@@ -24,7 +25,7 @@ class MainAreaComponent extends React.Component {
         }
     }
 
-    requestDDL() {
+    getObjectStructure() {
         log.info('request DDL button clicked');
         // args['objectType'], args['objectName'], args['dbSchema']
         if (this.state.currentActiveTabId === -1) {
@@ -50,13 +51,14 @@ class MainAreaComponent extends React.Component {
     }
 
     bindComponentListeners() {
-        this.requestDDL = this.requestDDL.bind(this);
+        this.getObjectStructure = this.getObjectStructure.bind(this);
         this.handleMenuItemClick = this.handleMenuItemClick.bind(this);
         this.handleTabCloseIconClick = this.handleTabCloseIconClick.bind(this);
         this.addNewTab = this.addNewTab.bind(this);
         this.closeAllTabs = this.closeAllTabs.bind(this);
         this.handleMenuItemOnMouseDown = this.handleMenuItemOnMouseDown.bind(this);
         this.handleResultTextAreaChange = this.handleResultTextAreaChange.bind(this);
+        this.isDisabled = this.isDisabled.bind(this);
     }
 
     handleMenuItemClick(event, data) {
@@ -145,8 +147,10 @@ class MainAreaComponent extends React.Component {
             subGroupName: subGroupName,
             value: ''
         });
-        //update state
-        this.setState({ tabs: tabsArray, currentActiveTabId: 0 });
+        //update state and after status is updated try to fetch database object structure
+        this.setState({ tabs: tabsArray, currentActiveTabId: 0 }, () => {
+            this.getObjectStructure();
+        });
 
 
 
@@ -227,10 +231,13 @@ class MainAreaComponent extends React.Component {
         };
         return (
             <Container fluid>
-                <Button loading={this.state.isLoading} disabled={this.state.isLoading || this.state.tabs.length === 0} onClick={this.requestDDL}>Request DDL</Button>
-                <Divider />
-                {/* <Tab menu={{ tabular: true, stackable: true, color: 'teal', size: 'tiny' }} panes={this.state.panes} renderActiveOnly={true} /> */}
-
+                <OperationButtonsComponent addMessageToNotificationsArray={this.props.addMessageToNotificationsArray}
+                    isLoading={this.state.isLoading}
+                    getObjectStructure={this.getObjectStructure}
+                    isDisabled={this.isDisabled()}
+                    contentToSave={(this.state.tabs[this.state.currentActiveTabId] === undefined) ? null : this.state.tabs[this.state.currentActiveTabId].value}
+                    fileName={(this.state.tabs[this.state.currentActiveTabId] === undefined) ? null : this.state.tabs[this.state.currentActiveTabId].subGroupName + '.sql'}
+                />
                 <Menu className='CustomTopMenu' attached='top' tabular color='teal' size='tiny'>
                     {
                         this.state.tabs.map((value, i) => {
@@ -242,7 +249,7 @@ class MainAreaComponent extends React.Component {
                     }
 
                 </Menu>
-                <Segment disabled={this.state.tabs[this.state.currentActiveTabId] === undefined || this.state.tabs[this.state.currentActiveTabId].value === '' || this.state.isLoading}
+                <Segment disabled={this.isDisabled() || this.state.tabs[this.state.currentActiveTabId].value === ''}
                     loading={this.state.isLoading}
                     className='ResultsTextAreaSegment'
                     inverted basic compact attached='bottom'>
@@ -257,17 +264,35 @@ class MainAreaComponent extends React.Component {
         )
     };
 
+    isDisabled() {
+        // console.log('isDisabled');
+        return this.state.tabs[this.state.currentActiveTabId] === undefined || this.state.isLoading;
+    }
+
     registerIpcListeners() {
         ipcRenderer.on(rpcNames.GET_DDL.respName, (event, arg) => {
-            // log.info(arg);
+            // console.log('ipcRenderer.on(rpcNames.GET_DDL.respName response: ',arg);
             if (arg.status === Constants.SUCCESS_MESSAGE) {
                 const currentActiveTabId = this.state.currentActiveTabId;
                 const tabs = this.state.tabs;
-                if (currentActiveTabId != -1) {
-                    tabs[currentActiveTabId].value = arg.value;
+                // if (currentActiveTabId != -1) {
+                //     tabs[currentActiveTabId].value = arg.value;
 
+                // }
+                const tabObject = tabs.find((currentValue) => {
+                    return currentValue.groupName === arg.value.groupName && currentValue.subGroupName === arg.value.subGroupName;
+                });
+                if(tabObject){
+                    // console.log(' registerIpcListeners found tabObject to which to assign value: ', tabObject);
+                    tabObject.value = arg.value.result;
+                    this.setState({ tabs: tabs, isLoading: false });
+                }else{
+                    this.props.addMessageToNotificationsArray({ isPositive: false, text: 'Could not find tab with groupName: '+ arg.value.groupName +
+                        ' and subGroupName: '+ arg.value.subGroupName + ' to which to apply received value !'});
+                        this.setState({isLoading: false });
                 }
-                this.setState({ tabs: tabs, isLoading: false });
+
+                
             } else if (arg.status === Constants.FAILURE_MESSAGE) {
                 this.props.addMessageToNotificationsArray({ isPositive: false, text: arg.value });
                 this.setState({ isLoading: false });
