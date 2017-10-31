@@ -9,6 +9,7 @@ class ErrorSuccessModalComponent extends React.Component {
         return (
             <Modal
                 dimmer='blurring'
+                size='small'
                 open={this.props.notificationsArray.length > 0}
                 onClose={this.props.closeHandler}>
                 <Modal.Content>
@@ -21,7 +22,7 @@ class ErrorSuccessModalComponent extends React.Component {
                     })}
                 </Modal.Content>
                 <Modal.Actions>
-                    <Button content='Close' onClick={this.props.closeHandler} />
+                    <Button content='Ok' color='green' onClick={this.props.closeHandler} />
                 </Modal.Actions>
 
             </Modal>

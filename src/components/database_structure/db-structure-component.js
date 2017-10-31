@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 const { ipcRenderer } = require('electron');
-import { Container, Accordion, Menu, Label, Grid, Segment, Icon } from 'semantic-ui-react';
+import { Container, Accordion, Menu, Label, Grid, Segment, Icon, Button } from 'semantic-ui-react';
 import Constants from '../../constants/constants.js';
 import rpcNames from '../../constants/rpc-names.js';
 import PropTypes from 'prop-types';
@@ -43,7 +43,12 @@ class DbStructureComponent extends React.Component {
                         {this.state.structureItemsArray.map((value, i) => {
                             return <Menu.Item className='dbStructureMainAccordion' key={i}>
                                 <Accordion.Title onClick={this.handleAccordionTitleClick}
-                                    content={(<Label color='brown' >{value.itemName}</Label>)}
+                                    content={(
+                                        <Container>
+                                    <Label color='brown' >{value.itemName}</Label>
+                                    <Button floated='right' icon='filter' color='teal' size='mini'/>
+                                    </Container>
+                                    )}
                                     index={i} active={value.active}>
 
                                 </Accordion.Title>

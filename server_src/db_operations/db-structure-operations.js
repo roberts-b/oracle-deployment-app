@@ -73,7 +73,7 @@ exports.getAllObjectsByObjectType = function (objectType) {
                         doRelease(connection).catch(function (error) {
                             reject(Error(error));
                         });
-                        resolve({objectType: objectType, resultArray : result});
+                        resolve({ objectType: objectType, resultArray: result });
                     })
             });
     });
