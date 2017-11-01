@@ -13,7 +13,7 @@ ipcMain.on(rpcNames.GET_DDL.reqName, (event, args) => {
 
         }).catch(function(error){
             log.error('DDLListener received from getDDLFunction reply: ', error);
-            event.sender.send(rpcNames.GET_DDL.respName, {status: constants.FAILURE_MESSAGE, value: error.message});
+            event.sender.send(rpcNames.GET_DDL.respName, {status: constants.FAILURE_MESSAGE, value: {result: error.message, subGroupName: args.objectName, groupName: args.objectType}});
         });
     
     

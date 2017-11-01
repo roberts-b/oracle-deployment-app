@@ -272,31 +272,36 @@ class MainAreaComponent extends React.Component {
     registerIpcListeners() {
         ipcRenderer.on(rpcNames.GET_DDL.respName, (event, arg) => {
             // console.log('ipcRenderer.on(rpcNames.GET_DDL.respName response: ',arg);
+            const tabs = this.state.tabs;
+            let arrayIndex = -1;
+            const tabObject = tabs.find((currentValue, index) => {
+                if(currentValue.groupName === arg.value.groupName && currentValue.subGroupName === arg.value.subGroupName){
+                    arrayIndex = index;
+                    return true;
+                }
+                return false;
+                
+            });
+
             if (arg.status === Constants.SUCCESS_MESSAGE) {
                 const currentActiveTabId = this.state.currentActiveTabId;
-                const tabs = this.state.tabs;
-                // if (currentActiveTabId != -1) {
-                //     tabs[currentActiveTabId].value = arg.value;
-
-                // }
-                const tabObject = tabs.find((currentValue) => {
-                    return currentValue.groupName === arg.value.groupName && currentValue.subGroupName === arg.value.subGroupName;
-                });
                 if(tabObject){
                     // console.log(' registerIpcListeners found tabObject to which to assign value: ', tabObject);
                     tabObject.value = arg.value.result;
-                    this.setState({ tabs: tabs, isLoading: false });
                 }else{
                     this.props.addMessageToNotificationsArray({ isPositive: false, text: 'Could not find tab with groupName: '+ arg.value.groupName +
                         ' and subGroupName: '+ arg.value.subGroupName + ' to which to apply received value !'});
-                        this.setState({isLoading: false });
                 }
 
                 
             } else if (arg.status === Constants.FAILURE_MESSAGE) {
-                this.props.addMessageToNotificationsArray({ isPositive: false, text: arg.value });
-                this.setState({ isLoading: false });
+                this.props.addMessageToNotificationsArray({ isPositive: false, text: arg.value.result });
+                
+                //close this tab because it is 
+                this.closeClickedTab(arrayIndex);
             }
+
+            this.setState({ isLoading: false });
         });
     }
 

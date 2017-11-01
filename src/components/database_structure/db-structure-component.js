@@ -6,6 +6,7 @@ import rpcNames from '../../constants/rpc-names.js';
 import PropTypes from 'prop-types';
 var log = require('electron-log');
 import { List } from 'react-virtualized';
+import DbStructureFilterComponent from './db-structure-filter-component.js';
 
 class DbStructureComponent extends React.Component {
 
@@ -38,6 +39,12 @@ class DbStructureComponent extends React.Component {
     render() {
         return (
             <Container fluid>
+                <DbStructureFilterComponent
+                    isNot={true}
+                    filterExpression='expression'
+                    onFilterUpdated={this.onFilterUpdated}
+                    ref={(dbStructureFilterComponentReference) => { this.dbStructureFilterComponentReference = dbStructureFilterComponentReference; }}
+                />
                 <Segment compact className='structureComponentSegmentAroundAccordion' basic loading={this.state.isLoading}>
                     <Accordion className='dbStructureMainAccordion' styled as={Menu} vertical fluid>
                         {this.state.structureItemsArray.map((value, i) => {
@@ -45,9 +52,11 @@ class DbStructureComponent extends React.Component {
                                 <Accordion.Title onClick={this.handleAccordionTitleClick}
                                     content={(
                                         <Container>
-                                    <Label color='brown' >{value.itemName}</Label>
-                                    <Button floated='right' icon='filter' color='teal' size='mini'/>
-                                    </Container>
+                                            <Label color='brown' >{value.itemName}</Label>
+                                            <Button
+                                                onClick={this.handleFilterButtonClick.bind(this, value.itemName)}
+                                                floated='right' icon='filter' color='teal' size='mini' />
+                                        </Container>
                                     )}
                                     index={i} active={value.active}>
 
@@ -94,6 +103,7 @@ class DbStructureComponent extends React.Component {
     bindComponentListeners() {
         this.handleAccordionTitleClick = this.handleAccordionTitleClick.bind(this);
         this.handleMenuItemSelection = this.handleMenuItemSelection.bind(this);
+        this.onFilterUpdated = this.onFilterUpdated.bind(this);
 
     }
 
@@ -145,12 +155,12 @@ class DbStructureComponent extends React.Component {
         if (currentlySelectedItem.groupId != -1 &&
             currentlySelectedItem.subGroupId != -1 &&
             (currentlySelectedItem.groupId != parentGroupId ||
-            currentlySelectedItem.subGroupId != subGroupId)) {
-                structureItemsArray[currentlySelectedItem.groupId].itemValues[currentlySelectedItem.subGroupId].active = false;
+                currentlySelectedItem.subGroupId != subGroupId)) {
+            structureItemsArray[currentlySelectedItem.groupId].itemValues[currentlySelectedItem.subGroupId].active = false;
         }
 
         this.setCurrentlySelectedItemIdsToState(parentGroupId, subGroupId);
-        this.setState({ currentlySelectedItem: currentlySelectedItem });
+        // this.setState({ currentlySelectedItem: currentlySelectedItem });
 
         //additionally we must send request to parent component that selection happened
         this.props.handleSubgroupItemSelection(structureItemsArray[currentlySelectedItem.groupId].itemName, structureItemsArray[currentlySelectedItem.groupId].itemValues[currentlySelectedItem.subGroupId].name);
@@ -242,6 +252,17 @@ class DbStructureComponent extends React.Component {
         currentlySelectedItem.groupId = groupId;
         currentlySelectedItem.subGroupId = subGroupId;
         this.setState({ currentlySelectedItem: currentlySelectedItem });
+    }
+
+    handleFilterButtonClick(objectName, event) {
+        console.log('handleFilterButtonClick event: ', event, ' data: ', objectName);
+
+        event.stopPropagation();
+        this.dbStructureFilterComponentReference.openFilterComponent(objectName);
+    }
+
+    onFilterUpdated(objectName){
+        console.log('onFilterUpdated called with objectName: ', objectName);
     }
 }
 

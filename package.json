@@ -41,6 +41,7 @@
   "dependencies": {
     "electron-log": "^2.2.9",
     "electron-settings": "^3.1.2",
+    "node-svn-ultimate": "^1.1.0",
     "oracledb": "^1.13.1",
     "tns": "^0.1.0"
   }
