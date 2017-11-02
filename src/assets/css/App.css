@@ -92,3 +92,7 @@
   background-color: rgba(229, 229, 229, 1);
   border-radius: .28571429rem .28571429rem 0 0;
 }
+
+.dbStructureFilterModalComponent{
+  max-width: 400px;
+}

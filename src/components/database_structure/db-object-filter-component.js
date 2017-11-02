@@ -1,7 +1,10 @@
 import React, { Component } from 'react';
+const { ipcRenderer } = require('electron');
 import { Modal, Button, Input, Checkbox, Label, Segment } from 'semantic-ui-react';
 import PropTypes from 'prop-types';
 const log = require('electron-log');
+import rpcNames from '../../constants/rpc-names.js';
+import Constants from '../../constants/constants.js';
 
 class DbStructureFilterComponent extends React.Component {
 
@@ -30,13 +33,14 @@ class DbStructureFilterComponent extends React.Component {
         return (
             <Modal
                 size='small'
+                className='dbStructureFilterModalComponent'
                 dimmer={true}
                 open={this.state.isOpen}
                 onClose={this.closeHandler}>
                 <Modal.Header content={'Filter for ' + this.state.objectName} />
                 <Modal.Content>
                     <Segment>
-                        <Checkbox name='isNotCheckbox' toggle label=' Not' checked={this.state.isNot} onChange={this.handleInputChange} />
+                        <Checkbox name='isNotCheckbox' label=' Not' checked={this.state.isNot} onChange={this.handleInputChange} />
                         <Input name='filterExpressionInput' label='Expression' placeholder='Filter expression...' value={this.state.filterExpression} onChange={this.handleInputChange} />
                     </Segment>
                 </Modal.Content>
@@ -55,14 +59,29 @@ class DbStructureFilterComponent extends React.Component {
 
     openFilterComponent(objectName) {
         //get current filter values from settings for this objectname
-        this.setState({ isOpen: true, objectName: objectName });
+        let result = ipcRenderer.sendSync(rpcNames.GET_OBJECT_FILTER_PARAMETERS.reqName, objectName);
+        // console.log('openFilterComponent GET_OBJECT_FILTER_PARAMETERS returned: ', result);
+        //{objectName: objectName, expression: expression, isNot: isNot}
+        if(Constants.SUCCESS_MESSAGE === result.status){
+            this.setState({ isOpen: true, objectName: objectName, filterExpression: result.result.expression, isNot: result.result.isNot});
+        }else if(Constants.FAILURE_MESSAGE === result.status){
+            this.props.addMessageToNotificationsArray({ isPositive: false, text: result.message });
+        }
+        
     }
 
     saveFilterHandler() {
+        
+        let result = ipcRenderer.sendSync(rpcNames.SAVE_OBJECT_FILTER_PARAMETERS.reqName, 
+            {objectName: this.state.objectName, expression: this.state.filterExpression, isNot: this.state.isNot});
 
-        //TODO: most probably this should be called after callback from function which updates settings and sets filters
-        //so database structure component then reexecutes its query
-        this.props.onFilterUpdated(this.state.objectName);
+        
+        if(Constants.SUCCESS_MESSAGE === result.status){
+            this.props.onFilterUpdated(this.state.objectName);
+        }else if(Constants.FAILURE_MESSAGE === result.status){
+            this.props.addMessageToNotificationsArray({ isPositive: false, text: result.message });
+        }
+
         this.closeHandler();
     }
 
@@ -81,8 +100,8 @@ class DbStructureFilterComponent extends React.Component {
 }
 
 DbStructureFilterComponent.PropTypes = {
-    objectName: PropTypes.string.isRequired,
-    onFilterUpdated: PropTypes.func.isRequired
+    onFilterUpdated: PropTypes.func.isRequired,
+    addMessageToNotificationsArray: PropTypes.func.isRequired,
 
 }
 

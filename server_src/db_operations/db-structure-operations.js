@@ -1,6 +1,8 @@
 var oracledb = require('oracledb');
 var log = require('electron-log');
+var constants = require('../../src/constants/constants.js');
 var { doRelease, getConnectionParametersObject } = require('../helpers/db-helpers.js');
+var { getDbStructureFilterParameters } = require('../helpers/settings-helper.js');
 var { queryAll } = require('../helpers/query-all.js');
 
 
@@ -40,7 +42,7 @@ exports.getUniqueObjectTypes = function () {
     });
 };
 
-exports.getAllObjectsByObjectType = function (objectType) {
+exports.getAllObjectSubTypesByObjectType = function (objectType) {
     log.info('getAllObjectsByObjectType called with objectType: ', objectType);
     const connectionParams = getConnectionParametersObject();
 
@@ -54,10 +56,25 @@ exports.getAllObjectsByObjectType = function (objectType) {
                     reject(Error(err));
                     return;
                 }
-                log.info('getAllObjectsByObjectType executing query: SELECT OBJECT_NAME, STATUS FROM ALL_OBJECTS where OWNER= :owner_bv and OBJECT_TYPE=:object_type_bv order by OBJECT_NAME');
 
-                queryAll(connection,
-                    "SELECT OBJECT_NAME, STATUS FROM ALL_OBJECTS where OWNER= :owner_bv and OBJECT_TYPE=:object_type_bv order by OBJECT_NAME",
+                const filterParameters = getDbStructureFilterParameters(objectType);
+                let selectStatement = 'SELECT OBJECT_NAME, STATUS FROM ALL_OBJECTS where OWNER= :owner_bv and OBJECT_TYPE=:object_type_bv';
+                if(constants.SUCCESS_MESSAGE === filterParameters.status && '' != filterParameters.result.expression){
+                    //apply filter statement to select statement object
+                    selectStatement = selectStatement + ' and OBJECT_NAME';
+                    if(filterParameters.result.isNot){
+                        selectStatement = selectStatement + ' NOT';
+                    }
+
+                    selectStatement = selectStatement + ' LIKE \''+ filterParameters.result.expression + '\'';
+                }else{
+                    log.error('getAllObjectSubTypesByObjectType occured error during attempt to get filter parameters for object: ',
+                        objectType, ' with following error: ',filterParameters.message);
+                }
+                selectStatement = selectStatement + ' order by OBJECT_NAME';
+
+                log.info('getAllObjectSubTypesByObjectType executing query with select statement: ', selectStatement);
+                queryAll(connection, selectStatement,
                     [connectionParams.user.toUpperCase(), objectType],
                     300,
                     function (err, result) {

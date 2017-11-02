@@ -8,7 +8,7 @@ exports.getTnsFilePath = function(){
     return settings.get(constants.TNSNAMES_FOLDER_SETTINGS_NAME, path.join(__dirname,'..','..', '/tnsNames/'));
 };
 
-exports.getCurrentTnsName = function(){
+var getCurrentTnsName = exports.getCurrentTnsName = function(){
     let currentTnsName = settings.get(constants.CURRENT_DATABASE_SETTINGS_NAME);
     return currentTnsName;
 }
@@ -56,4 +56,39 @@ exports.setUserNamePasswordByTnsName = function(valueObject){
     settings.set(tnsName+'.user', userName);
     settings.set(tnsName+'.password', password);
     return 'New values are preset successfully';
+}
+
+//Expected input structure: {objectName: '', filterExpression: '', isNot: false}
+exports.saveDbStructureFilterParameters = function(valueObject){
+    log.info('saveDbStructureFilterParameters received value: ', valueObject);
+    const currentTnsName = getCurrentTnsName();
+    if(!currentTnsName || '' === currentTnsName){
+        return {status: constants.FAILURE_MESSAGE, message: 'Saving failed current TNS name is null or undefined'};
+    }
+
+    if(!valueObject.objectName || '' === valueObject.objectName){
+        return {status: constants.FAILURE_MESSAGE, message: 'Saving failed provided object name is null or undefined'};
+    }
+    const saveExpressionFirstPart = currentTnsName+'_'+valueObject.objectName;
+    settings.set(saveExpressionFirstPart+'.expression', valueObject.expression);
+    settings.set(saveExpressionFirstPart+'.isNot', valueObject.isNot);
+    return {status: constants.SUCCESS_MESSAGE, message: 'Structure filter values saved successfully'};
+}
+
+exports.getDbStructureFilterParameters = function(objectName){
+    const currentTnsName = getCurrentTnsName();
+    if(!currentTnsName || '' === currentTnsName){
+        log.error('Getting current filter parameters failed, because currentTnsName is undefined or empty');
+        return {status: constants.FAILURE_MESSAGE, message: 'Getting current filter parameters failed, because currentTnsName is undefined or empty'};
+    }
+
+    if(!objectName || '' === objectName){
+        return {status: constants.FAILURE_MESSAGE, message: 'Getting current filter parameters failed provided object name is null or undefined'};
+    }
+    const getExpressionFirstPart = currentTnsName+'_'+objectName;
+    let expression = settings.get(getExpressionFirstPart+'.expression', '');
+    let isNot = settings.get(getExpressionFirstPart+'.isNot', false);
+    const returnValue = {objectName: objectName, expression: expression, isNot: isNot};
+    // log.info('getDbStructureFilterParameters for : ', getExpressionFirstPart, ' returning: ', returnValue);
+    return {status: constants.SUCCESS_MESSAGE, result: returnValue};
 }

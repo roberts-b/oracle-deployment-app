@@ -1,6 +1,6 @@
 var {ipcMain} = require('electron');
 var log = require('electron-log');
-var {getUniqueObjectTypes, getAllObjectsByObjectType} = require('../db_operations/db-structure-operations.js');
+var {getUniqueObjectTypes, getAllObjectSubTypesByObjectType} = require('../db_operations/db-structure-operations.js');
 const constants = require('../../src/constants/constants.js');
 const rpcNames = require('../../src/constants/rpc-names.js');
 
@@ -21,7 +21,7 @@ ipcMain.on(rpcNames.GET_UNIQUE_OBJECT_TYPES.reqName, (event, args) => {
 
  ipcMain.on(rpcNames.GET_ALL_OBJECTS_BY_OBJECT_TYPE.reqName, (event, args) => { 
     log.info('GET_ALL_OBJECTS_BY_OBJECT_TYPE received objectType: ', args); 
-    getAllObjectsByObjectType(args).
+    getAllObjectSubTypesByObjectType(args).
         then(function(result){
             // log.info('GET_ALL_OBJECTS_BY_OBJECT_TYPE received from getUniqueObjectTypes reply: ', result);
             event.sender.send(rpcNames.GET_ALL_OBJECTS_BY_OBJECT_TYPE.respName, {status: constants.SUCCESS_MESSAGE, value: result});

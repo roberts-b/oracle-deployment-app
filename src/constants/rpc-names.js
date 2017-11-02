@@ -54,4 +54,16 @@ module.exports = {
 		respName: 'save_file_response_async'
 	},
 
+	SAVE_OBJECT_FILTER_PARAMETERS: {
+		type: constants.SYNC_RPC_TYPE_NAME,
+		reqName: 'save_object_filter_parameters_sync',
+		respName: 'save_object_filter_parameters_response_sync'
+	},
+
+	GET_OBJECT_FILTER_PARAMETERS: {
+		type: constants.SYNC_RPC_TYPE_NAME,
+		reqName: 'get_object_filter_parameters_sync',
+		respName: 'get_object_filter_parameters_response_sync'
+	},
+
 };

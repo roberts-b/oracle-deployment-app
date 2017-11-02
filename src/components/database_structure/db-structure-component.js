@@ -6,7 +6,7 @@ import rpcNames from '../../constants/rpc-names.js';
 import PropTypes from 'prop-types';
 var log = require('electron-log');
 import { List } from 'react-virtualized';
-import DbStructureFilterComponent from './db-structure-filter-component.js';
+import DbStructureFilterComponent from './db-object-filter-component.js';
 
 class DbStructureComponent extends React.Component {
 
@@ -43,6 +43,7 @@ class DbStructureComponent extends React.Component {
                     isNot={true}
                     filterExpression='expression'
                     onFilterUpdated={this.onFilterUpdated}
+                    addMessageToNotificationsArray={this.props.addMessageToNotificationsArray}
                     ref={(dbStructureFilterComponentReference) => { this.dbStructureFilterComponentReference = dbStructureFilterComponentReference; }}
                 />
                 <Segment compact className='structureComponentSegmentAroundAccordion' basic loading={this.state.isLoading}>
@@ -154,6 +155,7 @@ class DbStructureComponent extends React.Component {
         //we must remove old selected item only if there was not initial state (something was already selected before)
         if (currentlySelectedItem.groupId != -1 &&
             currentlySelectedItem.subGroupId != -1 &&
+            structureItemsArray[currentlySelectedItem.groupId].itemValues[currentlySelectedItem.subGroupId] &&
             (currentlySelectedItem.groupId != parentGroupId ||
                 currentlySelectedItem.subGroupId != subGroupId)) {
             structureItemsArray[currentlySelectedItem.groupId].itemValues[currentlySelectedItem.subGroupId].active = false;
@@ -263,6 +265,25 @@ class DbStructureComponent extends React.Component {
 
     onFilterUpdated(objectName){
         console.log('onFilterUpdated called with objectName: ', objectName);
+        //open this tab and refresh it or only refresh if already opened
+        let structureItemsArray = this.state.structureItemsArray;
+        let foundElement = {};
+        structureItemsArray.some((element, index, array) => {
+            if (element.itemName === objectName) {
+                foundElement = element;
+                return true;
+            }
+        });
+
+        //set this item to active
+        foundElement.active = true;
+        //call refresh 
+        log.info('isLoading: ', this.state.isLoading);
+        ipcRenderer.send(rpcNames.GET_ALL_OBJECTS_BY_OBJECT_TYPE.reqName, foundElement.itemName);
+
+        //remove existing sub elements from found element
+        foundElement.itemValues = [];
+        this.setState({ isLoading: true, structureItemsArray: structureItemsArray });
     }
 }
 
