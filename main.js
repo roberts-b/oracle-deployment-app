@@ -1,6 +1,6 @@
 'use strict';
 
-require('./server_src/setup/environment-setup.js');
+// require('./server_src/setup/environment-setup.js');
 // var {getAllObjectsByObjectType} = require('./server_src/db_operations/db-structure-operations.js');
 
 // Import parts of electron to use
@@ -20,6 +20,7 @@ if (process.defaultApp || /[\\/]electron-prebuilt[\\/]/.test(process.execPath) |
 }
 
 function createWindow() {
+  require('./server_src/setup/environment-setup.js');
   //start listener
   loadAllListeners();
 

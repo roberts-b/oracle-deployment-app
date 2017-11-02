@@ -11,6 +11,10 @@ exports.getUniqueObjectTypes = function () {
 
     log.info(connectionParams);
     return new Promise(function (resolve, reject) {
+        if(connectionParams.user === '' || connectionParams.password === ''){
+            reject(Error('Username or password cannot be empty !'));
+            return;
+        }
         oracledb.getConnection(
             connectionParams,
             function (err, connection) {
@@ -61,12 +65,12 @@ exports.getAllObjectSubTypesByObjectType = function (objectType) {
                 let selectStatement = 'SELECT OBJECT_NAME, STATUS FROM ALL_OBJECTS where OWNER= :owner_bv and OBJECT_TYPE=:object_type_bv';
                 if(constants.SUCCESS_MESSAGE === filterParameters.status && '' != filterParameters.result.expression){
                     //apply filter statement to select statement object
-                    selectStatement = selectStatement + ' and OBJECT_NAME';
+                    selectStatement = selectStatement + ' and UPPER(OBJECT_NAME)';
                     if(filterParameters.result.isNot){
                         selectStatement = selectStatement + ' NOT';
                     }
 
-                    selectStatement = selectStatement + ' LIKE \''+ filterParameters.result.expression + '\'';
+                    selectStatement = selectStatement + ' LIKE UPPER(\''+ filterParameters.result.expression + '\')';
                 }else{
                     log.error('getAllObjectSubTypesByObjectType occured error during attempt to get filter parameters for object: ',
                         objectType, ' with following error: ',filterParameters.message);

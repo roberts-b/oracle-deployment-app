@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 const { ipcRenderer } = require('electron');
-import { Container, Accordion, Menu, Label, Grid, Segment, Icon, Button } from 'semantic-ui-react';
+import { Container, Accordion, Menu, Label, Grid, Segment, Icon, Button, Header } from 'semantic-ui-react';
 import Constants from '../../constants/constants.js';
 import rpcNames from '../../constants/rpc-names.js';
 import PropTypes from 'prop-types';
@@ -36,19 +36,22 @@ class DbStructureComponent extends React.Component {
 
     }
 
+    MainComponentContent(props) {
+
+    }
+
     render() {
-        return (
-            <Container fluid>
-                <DbStructureFilterComponent
-                    isNot={true}
-                    filterExpression='expression'
-                    onFilterUpdated={this.onFilterUpdated}
-                    addMessageToNotificationsArray={this.props.addMessageToNotificationsArray}
-                    ref={(dbStructureFilterComponentReference) => { this.dbStructureFilterComponentReference = dbStructureFilterComponentReference; }}
-                />
-                <Segment compact className='structureComponentSegmentAroundAccordion' basic loading={this.state.isLoading}>
-                    <Accordion className='dbStructureMainAccordion' styled as={Menu} vertical fluid>
-                        {this.state.structureItemsArray.map((value, i) => {
+        let mainComponentContent = null;
+        if (this.state.structureItemsArray.length === 0) {
+            mainComponentContent = (
+                <Header>No Elements to show</Header>
+            );
+        } else {
+
+            mainComponentContent = (
+                <Accordion className='dbStructureMainAccordion' styled as={Menu} vertical fluid>
+                    {
+                        this.state.structureItemsArray.map((value, i) => {
                             return <Menu.Item className='dbStructureMainAccordion' key={i}>
                                 <Accordion.Title onClick={this.handleAccordionTitleClick}
                                     content={(
@@ -71,7 +74,7 @@ class DbStructureComponent extends React.Component {
                                         rowHeight={40}
                                         rowRenderer={
                                             ({
-                                                key,         // Unique key within array of rows
+                                key,         // Unique key within array of rows
                                                 index,       // Index of row within collection
                                                 isScrolling, // The List is currently being scrolled
                                                 isVisible,   // This row is visible within the List (eg it is not an overscanned row)
@@ -90,11 +93,26 @@ class DbStructureComponent extends React.Component {
                                                 )
                                             }
                                         }
+
                                     />
                                 </Accordion.Content>
                             </Menu.Item>
                         })}
-                    </Accordion>
+                </Accordion>
+            );
+        }
+
+        return (
+            <Container fluid>
+                <DbStructureFilterComponent
+                    isNot={true}
+                    filterExpression='expression'
+                    onFilterUpdated={this.onFilterUpdated}
+                    addMessageToNotificationsArray={this.props.addMessageToNotificationsArray}
+                    ref={(dbStructureFilterComponentReference) => { this.dbStructureFilterComponentReference = dbStructureFilterComponentReference; }}
+                />
+                <Segment compact className='structureComponentSegmentAroundAccordion' basic loading={this.state.isLoading}>
+                    {mainComponentContent}
                 </Segment>
             </Container>
         );
@@ -178,6 +196,8 @@ class DbStructureComponent extends React.Component {
                 // this.props.addMessageToNotificationsArray({ isPositive: true, text: 'Success' });
             } else if (arg.status === Constants.FAILURE_MESSAGE) {
                 this.props.addMessageToNotificationsArray({ isPositive: false, text: arg.value });
+                //clear old structure objects if there was any
+                this.setState({ structureItemsArray: [] });
             }
             this.setState({ isLoading: false });
             this.setCurrentlySelectedItemIdsToState(-1, -1);
@@ -263,7 +283,7 @@ class DbStructureComponent extends React.Component {
         this.dbStructureFilterComponentReference.openFilterComponent(objectName);
     }
 
-    onFilterUpdated(objectName){
+    onFilterUpdated(objectName) {
         console.log('onFilterUpdated called with objectName: ', objectName);
         //open this tab and refresh it or only refresh if already opened
         let structureItemsArray = this.state.structureItemsArray;

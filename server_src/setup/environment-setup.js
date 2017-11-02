@@ -11,7 +11,7 @@ function getLogFileName() {
 }
 
 function getLogsFilesFolderPath() {
-    return settings.get(constants.LOGS_FOLDER_SETTINGS_NAME, path.join(__dirname, '..', '/logs/'));
+    return settings.get(constants.LOGS_FOLDER_SETTINGS_NAME, path.join(__dirname, '..', '..', '/logs/'));
 }
 
 function createLogsDir() {
@@ -26,7 +26,7 @@ function createLogsDir() {
 
 //sets path to Oracle Instant client
 // presetDefaultSettingsValueIfNeeded(INSTANT_CLIENT_SETTINGS_NAME);
-process.env['PATH'] = settings.get(constants.INSTANT_CLIENT_SETTINGS_NAME, path.join(__dirname, '..', '/instantclient')) + ';' + process.env['PATH'];
+process.env['PATH'] = settings.get(constants.INSTANT_CLIENT_SETTINGS_NAME, path.join(__dirname, '..', '..', '/instantclient')) + ';' + process.env['PATH'];
 
 //sets path to folder which contains tnsNames.ora file
 process.env['TNS_ADMIN'] = settingsHelper.getTnsFilePath();

@@ -85,7 +85,6 @@ class ConnectionComponent extends React.Component {
 
     handleInputChange(event, data) {
         const targetName = data.name;
-
         let newValue = data['value'];
 
         if (targetName === 'tnsDropDown') {
