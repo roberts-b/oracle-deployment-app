@@ -19,3 +19,5 @@ _Recommendation: Update the "postpackage" script call in package.json to specify
 * Then you can call electron-packager directly with any commands you choose
 
 If you want to test the production build (In case you think Babili might be breaking something) after running `npm run build` you can then call `npm run prod`. This will cause electron to load off of the `dist/` build instead of looking for the webpack-dev-server instance. Electron will launch automatically after compilation.
+
+To compile oracleDb driver you can run install_oracledb_for_electron.bat script, for compilation to succeed you must have folder with oracle instant client created in root folder of project
