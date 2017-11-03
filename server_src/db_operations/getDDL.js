@@ -41,7 +41,7 @@ exports.getDDLFunction = function (objectType, objectName) {
                             return;
                         }
                         // log.info(result.outBinds);
-                        parseClob(result.outBinds['ret'], connection).then(function (clobdata) {
+                        parseClob(result.outBinds.ret, connection).then(function (clobdata) {
                             resolve(clobdata);
                         }).catch(function (error) {
                             log.error(error);

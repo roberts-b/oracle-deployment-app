@@ -26,10 +26,10 @@ function createLogsDir() {
 
 //sets path to Oracle Instant client
 // presetDefaultSettingsValueIfNeeded(INSTANT_CLIENT_SETTINGS_NAME);
-process.env['PATH'] = settings.get(constants.INSTANT_CLIENT_SETTINGS_NAME, path.join(__dirname, '..', '..', '/instantclient')) + ';' + process.env['PATH'];
+process.env.PATH = settings.get(constants.INSTANT_CLIENT_SETTINGS_NAME, path.join(__dirname, '..', '..', '/instantclient')) + ';' + process.env.PATH;
 
 //sets path to folder which contains tnsNames.ora file
-process.env['TNS_ADMIN'] = settingsHelper.getTnsFilePath();
+process.env.TNS_ADMIN = settingsHelper.getTnsFilePath();
 
 //preset default tnsname if needed
 settingsHelper.presetDefaultTnsNameIfNeeded();

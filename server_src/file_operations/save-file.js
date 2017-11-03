@@ -16,9 +16,10 @@ exports.saveFile = function (contentToSave, fileName) {
                 { name: 'DB files', extensions: ['sql', 'pls', 'ddl'] },
                 { name: 'Any', extensions: ['*'] }
             ]
-        }
+        };
+
         if (fileName) {
-            dialogOptions.defaultPath = '~/' + fileName
+            dialogOptions.defaultPath = '~/' + fileName;
         }
 
         dialog.showSaveDialog(dialogOptions, function (fileName) {
@@ -36,8 +37,7 @@ exports.saveFile = function (contentToSave, fileName) {
                 }
 
                 resolve('Content successfully saved to file: ' + fileName);
-            })
-        })
+            });
+        });
     });
-
-}
+};

@@ -35,7 +35,7 @@ exports.getUniqueObjectTypes = function () {
                                 reject(Error(error));
                             });
                             return;
-                        };
+                        }
                         log.info('getUniqueObjectTypes : ', result);
                         doRelease(connection).catch(function (error) {
                             reject(Error(error));
@@ -89,13 +89,13 @@ exports.getAllObjectSubTypesByObjectType = function (objectType) {
                                 reject(Error(error));
                             });
                             return;
-                        };
+                        }
                         // log.info('getAllObjectsByObjectType : ', result);
                         doRelease(connection).catch(function (error) {
                             reject(Error(error));
                         });
                         resolve({ objectType: objectType, resultArray: result });
-                    })
+                    });
             });
     });
 };

@@ -16,7 +16,7 @@ class ConnectionComponent extends React.Component {
             allTnsNames: [],
 
             credentials: { userName: '', password: '' }
-        }
+        };
     }
 
     componentDidMount() {

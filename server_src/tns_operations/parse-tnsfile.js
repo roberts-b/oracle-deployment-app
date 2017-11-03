@@ -19,4 +19,4 @@ exports.getAllTnsNames = function(){
 
         });
     });
-}
+};

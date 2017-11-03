@@ -21,7 +21,7 @@ class DbStructureComponent extends React.Component {
                 groupId: -1,
                 subGroupId: -1
             }
-        }
+        };
     }
 
     componentDidMount() {

@@ -1,5 +1,3 @@
-"use strict";
-
 var log = require('electron-log');
 
 exports.queryAll = function(conn, sql, args, maxRowNumberToFetch, cb) {

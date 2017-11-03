@@ -22,7 +22,7 @@ class MainAreaComponent extends React.Component {
             isLoading: false,
             currentActiveTabId: -1,
             tabs: []
-        }
+        };
     }
 
     getObjectStructure() {
@@ -38,7 +38,7 @@ class MainAreaComponent extends React.Component {
         });
 
         this.setState({ isLoading: true });
-    };
+    }
 
     componentDidMount() {
         this.registerIpcListeners();
@@ -99,7 +99,7 @@ class MainAreaComponent extends React.Component {
 
         if (tabs[this.state.currentActiveTabId].value === value) {
             //same value already is submitted so no activities are necessary
-            console.log('same value already is submitted so no activities are necessary');
+            // console.log('same value already is submitted so no activities are necessary');
             return;
         }
         tabs[this.state.currentActiveTabId].value = value;

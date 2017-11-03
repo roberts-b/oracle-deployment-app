@@ -11,7 +11,7 @@ exports.getTnsFilePath = function(){
 var getCurrentTnsName = exports.getCurrentTnsName = function(){
     let currentTnsName = settings.get(constants.CURRENT_DATABASE_SETTINGS_NAME);
     return currentTnsName;
-}
+};
 
 exports.presetDefaultTnsNameIfNeeded = function () {
     //default is empty we must preset TNS name, lets pick first from the list tnsnames.ora file if ofcourse it is not empty
@@ -32,7 +32,7 @@ exports.setCurrentlyUsedTnsName = function(newTnsName) {
     log.info('setCurrentlyUsedTnsName setting new value: ', newTnsName);
     settings.set(constants.CURRENT_DATABASE_SETTINGS_NAME, newTnsName);
     return constants.SUCCESS_MESSAGE;
-}
+};
 
 exports.getUserNamePasswordByTnsName = function(tnsName) {
     log.info('getUserNamePasswordByTnsName received TnsName: ',tnsName);
@@ -46,7 +46,7 @@ exports.getUserNamePasswordByTnsName = function(tnsName) {
         password = '';
     }
     return {userName: userName, password: password};
-}
+};
 
 exports.setUserNamePasswordByTnsName = function(valueObject){
     log.info('setUserNamePasswordByTnsName received value: ', valueObject);
@@ -56,7 +56,7 @@ exports.setUserNamePasswordByTnsName = function(valueObject){
     settings.set(tnsName+'.user', userName);
     settings.set(tnsName+'.password', password);
     return 'New values are preset successfully';
-}
+};
 
 //Expected input structure: {objectName: '', filterExpression: '', isNot: false}
 exports.saveDbStructureFilterParameters = function(valueObject){
@@ -73,7 +73,7 @@ exports.saveDbStructureFilterParameters = function(valueObject){
     settings.set(saveExpressionFirstPart+'.expression', valueObject.expression);
     settings.set(saveExpressionFirstPart+'.isNot', valueObject.isNot);
     return {status: constants.SUCCESS_MESSAGE, message: 'Structure filter values saved successfully'};
-}
+};
 
 exports.getDbStructureFilterParameters = function(objectName){
     const currentTnsName = getCurrentTnsName();
@@ -91,4 +91,4 @@ exports.getDbStructureFilterParameters = function(objectName){
     const returnValue = {objectName: objectName, expression: expression, isNot: isNot};
     // log.info('getDbStructureFilterParameters for : ', getExpressionFirstPart, ' returning: ', returnValue);
     return {status: constants.SUCCESS_MESSAGE, result: returnValue};
-}
+};

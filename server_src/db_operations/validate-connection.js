@@ -1,6 +1,6 @@
 var oracledb = require('oracledb');
 var log = require('electron-log');
-var {doRelease, getConnectionParametersObject } = require('../helpers/db-helpers.js');
+var { doRelease, getConnectionParametersObject } = require('../helpers/db-helpers.js');
 
 
 // Get a non-pooled connection
@@ -14,7 +14,7 @@ exports.validateConnection = function (connectionParamsObject) {
             user: connectionParamsObject.userName,
             password: connectionParamsObject.password,
             connectString: connectionParamsObject.tnsName,
-        }
+        };
 
     } else {
         log.info('connection object is null so using getConnectionParametersObject() function');
@@ -43,13 +43,13 @@ exports.validateConnection = function (connectionParamsObject) {
                                 reject(Error(error));
                             });
                             return;
-                        };
-                        log.info('validate connection result for select SYSDATE from dual: ',result.rows);
+                        }
+                        log.info('validate connection result for select SYSDATE from dual: ', result.rows);
                         doRelease(connection).catch(function (error) {
                             reject(Error(error));
                         });
-                        resolve('Connection was created successfully with params: username: ' + connectionParams.user
-                            + ' password: ' + connectionParams.password + ' connectString: ' + connectionParams.connectString);
+                        resolve('Connection was created successfully with params: username: ' + connectionParams.user +
+                            ' password: ' + connectionParams.password + ' connectString: ' + connectionParams.connectString);
                     });
             });
     });

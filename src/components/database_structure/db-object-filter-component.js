@@ -18,7 +18,7 @@ class DbStructureFilterComponent extends React.Component {
             isNot: false,
             objectName: ''
 
-        }
+        };
     }
 
     bindComponentListeners() {

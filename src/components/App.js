@@ -8,7 +8,7 @@ import Constants from '../constants/constants.js';
 import rpcNames from '../constants/rpc-names.js';
 import ErrorSuccessModalComponent from './basic/error-success-modal.js';
 import DbStructureComponent from './database_structure/db-structure-component.js';
-import MainAreaComponent from './main_area/main-area-component.js'
+import MainAreaComponent from './main_area/main-area-component.js';
 const log = require('electron-log');
 
 
@@ -19,7 +19,7 @@ class App extends React.Component {
     this.bindComponentListeners();
     this.state = {
       notificationsArray: [],
-    }
+    };
   }
   componentDidMount() {
     this.registerIpcListeners();
@@ -30,8 +30,7 @@ class App extends React.Component {
       <Container fluid className='MainContainer'>
         <ErrorSuccessModalComponent
                 notificationsArray={this.state.notificationsArray}
-                closeHandler={this.closeHandlerFunc}
-        />
+                closeHandler={this.closeHandlerFunc} />
         <Segment.Group horizontal compact className='mainSegments'>
           <Segment compact className='dbStructureSegment'>
             <DbStructureComponent 
